@@ -1,0 +1,359 @@
+body {
+
+    margin:0;
+    font-family:
+    "Microsoft JhengHei",
+    sans-serif;
+
+    background:#f5f6fa;
+
+}
+
+
+
+.app {
+
+    display:flex;
+    height:100vh;
+
+}
+
+
+
+/* 左側 */
+
+.sidebar {
+
+
+    width:240px;
+
+    background:#1f2937;
+
+    color:white;
+
+    padding:25px;
+
+
+}
+
+
+
+.logo {
+
+    margin-bottom:40px;
+
+}
+
+
+
+.menu {
+
+    list-style:none;
+
+    padding:0;
+
+}
+
+
+
+.menu li {
+
+
+    padding:15px;
+
+    margin-bottom:10px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+}
+
+
+
+.menu li:hover {
+
+
+    background:#374151;
+
+}
+
+
+
+/* 右側 */
+
+
+.content {
+
+    flex:1;
+
+}
+
+
+
+/* 上方 */
+
+
+.topbar {
+
+
+    background:white;
+
+    padding:20px;
+
+    box-shadow:
+    0 2px 5px rgba(0,0,0,0.1);
+
+
+}
+
+
+
+/* 卡片區 */
+
+
+.dashboard {
+
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:20px;
+
+    padding:25px;
+
+
+}
+
+
+
+.card-box {
+
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    box-shadow:
+    0 3px 10px rgba(0,0,0,0.08);
+
+
+}
+
+
+
+.card-box p {
+
+
+    font-size:28px;
+
+    font-weight:bold;
+
+
+}
+
+
+
+/* 最近交易 */
+
+
+.transaction {
+
+
+    background:white;
+
+    margin:0 25px;
+
+    padding:25px;
+
+    border-radius:15px;
+
+
+}.menu-link{
+    color:white;
+    text-decoration:none;
+    display:block;
+}
+
+.menu-link:hover{
+    color:white;
+}
+/* ===============================
+   SmartBook 手機版響應式
+   =============================== */
+
+/* 平板以下 */
+@media (max-width: 992px) {
+
+    .sidebar {
+        width: 200px;
+        padding: 20px 15px;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card-box {
+        padding: 20px;
+    }
+
+}
+
+
+/* 手機版 */
+@media (max-width: 768px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .app {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* 左側選單改成上方選單 */
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .menu {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+    }
+
+    .menu li {
+        flex: 0 0 auto;
+        margin-bottom: 0;
+        padding: 10px 14px;
+    }
+
+    .content {
+        width: 100%;
+    }
+
+    .topbar {
+        padding: 15px;
+    }
+
+    .topbar h3 {
+        font-size: 22px;
+        margin: 0;
+    }
+
+    /* Dashboard 卡片改成雙欄 */
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 15px;
+    }
+
+    .card-box {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .card-box h5 {
+        font-size: 15px;
+    }
+
+    .card-box p {
+        font-size: 21px;
+        margin-bottom: 0;
+    }
+
+    .transaction {
+        margin: 0 15px;
+        padding: 18px;
+        overflow-x: auto;
+    }
+
+    /* 表單頁 */
+    .container {
+        max-width: 100%;
+        margin-top: 20px !important;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .card {
+        padding: 18px !important;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 46px;
+        font-size: 16px;
+    }
+
+    textarea.form-control {
+        min-height: 90px;
+    }
+
+    .btn {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    /* 表格可以左右滑動 */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 900px;
+    }
+
+}
+
+
+/* 小型手機 */
+@media (max-width: 480px) {
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .card-box {
+        text-align: center;
+    }
+
+    .menu li {
+        padding: 9px 12px;
+        font-size: 14px;
+    }
+
+    .transaction {
+        margin: 0 10px;
+        padding: 14px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    h4 {
+        font-size: 19px;
+    }
+
+}
