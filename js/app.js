@@ -114,6 +114,142 @@ function loadTransactions() {
     });
 
 }
+// ===============================
+// 搜尋與篩選交易
+// ===============================
+function filterTransactions() {
+
+    const keyword =
+        document.getElementById("searchKeyword")?.value
+            .trim()
+            .toLowerCase() || "";
+
+    const filterType =
+        document.getElementById("filterType")?.value || "";
+
+    const filterCategory =
+        document.getElementById("filterCategory")?.value || "";
+
+    const startDate =
+        document.getElementById("filterStartDate")?.value || "";
+
+    const endDate =
+        document.getElementById("filterEndDate")?.value || "";
+
+    const transactions = getTransactions();
+
+    const filteredTransactions = transactions
+        .map((transaction, originalIndex) => ({
+            transaction,
+            originalIndex
+        }))
+        .filter(({ transaction }) => {
+
+            const searchableText = [
+                transaction.item,
+                transaction.note,
+                transaction.advancePerson,
+                transaction.category
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            const keywordMatch =
+                !keyword || searchableText.includes(keyword);
+
+            const typeMatch =
+                !filterType || transaction.type === filterType;
+
+            const categoryMatch =
+                !filterCategory ||
+                (transaction.category || "其他") === filterCategory;
+
+            const startDateMatch =
+                !startDate || transaction.date >= startDate;
+
+            const endDateMatch =
+                !endDate || transaction.date <= endDate;
+
+            return (
+                keywordMatch &&
+                typeMatch &&
+                categoryMatch &&
+                startDateMatch &&
+                endDateMatch
+            );
+        });
+
+    displayFilteredTransactions(filteredTransactions);
+}
+// ===============================
+// 顯示篩選後交易
+// ===============================
+function displayFilteredTransactions(filteredTransactions) {
+
+    const table = document.getElementById("transactionList");
+
+    if (!table) return;
+
+    table.innerHTML = "";
+
+    if (filteredTransactions.length === 0) {
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="10" class="text-center py-5">
+
+                <h5>🔍 找不到符合條件的交易</h5>
+
+                <p class="text-muted mb-0">
+                    請修改搜尋條件後再試一次
+                </p>
+
+            </td>
+        </tr>
+    `;
+
+    return;
+}
+
+    filteredTransactions.forEach(
+        ({ transaction, originalIndex }) => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${transaction.date}</td>
+                <td>${transaction.type}</td>
+                <td>${transaction.category || "其他"}</td>
+                <td>${transaction.advancePerson || "-"}</td>
+                <td>${transaction.advanceStatus || "-"}</td>
+                <td>${transaction.recoveredDate || "-"}</td>
+                <td>${transaction.item}</td>
+                <td>
+                    NT$ ${Number(transaction.amount).toLocaleString()}
+                </td>
+                <td>${transaction.note || ""}</td>
+                <td>
+                    <button
+                        type="button"
+                        class="btn btn-warning btn-sm me-1"
+                        onclick="editTransaction(${originalIndex})">
+                        ✏️
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="deleteTransaction(${originalIndex})">
+                        🗑️
+                    </button>
+                </td>
+            `;
+
+            table.appendChild(row);
+        }
+    );
+}
 
 // ===============================
 // 編輯交易
@@ -870,6 +1006,70 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             exportTransactionsToExcel
         );
+    }
+
+    const searchBtn =
+    document.getElementById("searchBtn");
+
+const clearSearchBtn =
+    document.getElementById("clearSearchBtn");
+
+if (searchBtn) {
+    searchBtn.addEventListener(
+        "click",
+        filterTransactions
+    );
+}
+const searchKeyword =
+    document.getElementById("searchKeyword");
+
+if (searchKeyword) {
+
+    searchKeyword.addEventListener("keypress", function (e) {
+
+        if (e.key === "Enter") {
+
+            filterTransactions();
+
+        }
+
+    });
+
+} 
+
+if (clearSearchBtn) {
+
+    clearSearchBtn.addEventListener(
+        "click",
+        function () {
+
+            document.getElementById("searchKeyword").value = "";
+            document.getElementById("filterType").value = "";
+            document.getElementById("filterCategory").value = "";
+            document.getElementById("filterStartDate").value = "";
+            document.getElementById("filterEndDate").value = "";
+
+            loadTransactions();
+        }
+    );
+}
+
+});
+const filterIds = [
+    "filterType",
+    "filterCategory",
+    "filterStartDate",
+    "filterEndDate"
+];
+
+filterIds.forEach(id => {
+
+    const element = document.getElementById(id);
+
+    if (element) {
+
+        element.addEventListener("change", filterTransactions);
+
     }
 
 });
