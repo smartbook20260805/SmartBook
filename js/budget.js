@@ -7,7 +7,7 @@ console.log("Budget Module Loaded");
 const BUDGET_STORAGE_KEY = "monthlyBudget";
 const TRANSACTION_STORAGE_KEY = "transactions";
 
-// 讀取預算
+// 讀取每月預算
 function getMonthlyBudget() {
     return Number(
         localStorage.getItem(BUDGET_STORAGE_KEY)
@@ -28,7 +28,7 @@ function loadBudgetSetting() {
     }
 }
 
-// 儲存預算
+// 儲存每月預算
 function saveMonthlyBudget() {
     const budgetInput =
         document.getElementById("monthlyBudget");
@@ -61,23 +61,8 @@ function saveMonthlyBudget() {
     updateBudgetDashboard();
 }
 
-// 更新首頁預算資訊
-function updateBudgetDashboard() {
-    const budgetStatus =
-        document.getElementById("budgetStatus");
-
-    if (!budgetStatus) return;
-
-    const budgetProgress =
-    document.getElementById("budgetProgress"); 
-
-    const budget = getMonthlyBudget();
-
-    if (budget <= 0) {
-        budgetStatus.innerHTML = "尚未設定";
-        return;
-    }
-
+// 計算本月支出
+function getCurrentMonthExpense() {
     const transactions =
         JSON.parse(
             localStorage.getItem(TRANSACTION_STORAGE_KEY)
@@ -110,17 +95,75 @@ function updateBudgetDashboard() {
             Number(transaction.amount) || 0;
     });
 
+    return monthlyExpense;
+}
+
+// 更新首頁預算卡片
+function updateBudgetDashboard() {
+    const budgetStatus =
+        document.getElementById("budgetStatus");
+
+    const budgetProgress =
+        document.getElementById("budgetProgress");
+
+    if (!budgetStatus) return;
+
+    const budget = getMonthlyBudget();
+
+    if (budget <= 0) {
+        budgetStatus.innerHTML = "尚未設定";
+
+        if (budgetProgress) {
+            budgetProgress.style.width = "0%";
+            budgetProgress.textContent = "";
+        }
+
+        return;
+    }
+
+    const monthlyExpense = getCurrentMonthExpense();
     const remaining = budget - monthlyExpense;
-    const percentage =
-        (monthlyExpense / budget) * 100;
-    
-     if (budgetProgress) {
+    const percentage = (monthlyExpense / budget) * 100;
+    const displayPercentage = Math.min(percentage, 100);
+
+    let remainingText = `
+        <strong>剩餘：</strong>
+        NT$ ${remaining.toLocaleString()}
+    `;
+
+    if (remaining < 0) {
+        remainingText = `
+            <strong class="text-danger">
+                已超支：
+            </strong>
+            <span class="text-danger">
+                NT$ ${Math.abs(remaining).toLocaleString()}
+            </span>
+        `;
+    }
+
+    budgetStatus.innerHTML = `
+        <strong>預算：</strong>
+        NT$ ${budget.toLocaleString()}<br>
+
+        <strong>已使用：</strong>
+        NT$ ${monthlyExpense.toLocaleString()}<br>
+
+        ${remainingText}<br>
+
+        <strong>使用率：</strong>
+        ${percentage.toFixed(1)}%
+    `;
+
+    if (!budgetProgress) return;
 
     budgetProgress.style.width =
-        Math.min(percentage,100) + "%";
+        displayPercentage + "%";
 
     budgetProgress.textContent =
-        percentage.toFixed(1) + "%";
+        percentage >= 8
+            ? percentage.toFixed(1) + "%"
+            : "";
 
     budgetProgress.classList.remove(
         "bg-success",
@@ -129,51 +172,18 @@ function updateBudgetDashboard() {
     );
 
     if (percentage < 80) {
-
-        budgetProgress.classList.add(
-            "bg-success"
-        );
-
+        budgetProgress.classList.add("bg-success");
+    } else if (percentage < 100) {
+        budgetProgress.classList.add("bg-warning");
+    } else {
+        budgetProgress.classList.add("bg-danger");
     }
-
-    else if (percentage < 100) {
-
-        budgetProgress.classList.add(
-            "bg-warning"
-        );
-
-    }
-
-    else {
-
-        budgetProgress.classList.add(
-            "bg-danger"
-        );
-
-    }
-
-}   
- 
-    budgetStatus.innerHTML = `
-        <strong>預算：</strong>
-        NT$ ${budget.toLocaleString()}<br>
-
-        <strong>已使用：</strong>
-        NT$ ${monthlyExpense.toLocaleString()}<br>
-
-        <strong>剩餘：</strong>
-        NT$ ${remaining.toLocaleString()}<br>
-
-        <strong>使用率：</strong>
-        ${percentage.toFixed(1)}%
-    `;
 }
 
 // 頁面載入
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-
         loadBudgetSetting();
         updateBudgetDashboard();
 
@@ -187,4 +197,10 @@ document.addEventListener(
             );
         }
     }
+);
+
+// 從其他頁面返回首頁時更新
+window.addEventListener(
+    "pageshow",
+    updateBudgetDashboard
 );
