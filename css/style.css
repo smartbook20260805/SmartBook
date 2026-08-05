@@ -682,3 +682,29 @@ body {
 #budgetStatus strong {
     color: var(--sb-text);
 }
+/* ===============================
+   快速新增交易
+   =============================== */
+
+.quick-entry-section {
+    padding: 0 34px 20px;
+}
+
+.quick-entry-panel {
+    background: var(--sb-surface);
+}
+
+#quickEntryMessage {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+
+    .quick-entry-section {
+        padding: 0 16px 18px;
+    }
+
+}

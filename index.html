@@ -138,9 +138,7 @@
 
                 <div>
 
-                    <h5>
-                        收入
-                    </h5>
+                    <h5>收入</h5>
 
                     <p id="incomeTotal">
                         NT$ 0
@@ -163,9 +161,7 @@
 
                 <div>
 
-                    <h5>
-                        支出
-                    </h5>
+                    <h5>支出</h5>
 
                     <p id="expenseTotal">
                         NT$ 0
@@ -179,7 +175,7 @@
 
             </article>
 
-            <!-- 代墊 -->
+            <!-- 未收回代墊 -->
             <article class="card-box summary-card advance-card">
 
                 <div class="card-icon">
@@ -188,9 +184,7 @@
 
                 <div>
 
-                    <h5>
-                        未收回代墊
-                    </h5>
+                    <h5>未收回代墊</h5>
 
                     <p id="advanceTotal">
                         NT$ 0
@@ -213,9 +207,7 @@
 
                 <div>
 
-                    <h5>
-                        目前餘額
-                    </h5>
+                    <h5>目前餘額</h5>
 
                     <p id="balanceTotal">
                         NT$ 0
@@ -229,7 +221,7 @@
 
             </article>
 
-            <!-- 本月預算 -->
+            <!-- 預算 -->
             <article class="card-box summary-card budget-card">
 
                 <div class="card-icon">
@@ -243,27 +235,29 @@
                     </h5>
 
                     <div id="budgetStatus">
+                        尚未設定
+                    </div>
 
-                       尚未設定
+                    <div
+                        class="progress mt-3"
+                        style="height: 18px;"
+                    >
+
+                        <div
+                            id="budgetProgress"
+                            class="progress-bar bg-success"
+                            role="progressbar"
+                            style="width: 0%;"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                        ></div>
 
                     </div>
 
-                <div
-                         class="progress mt-3"
-                        style="height:12px;">
-
-                <div
-                         id="budgetProgress"
-
-                         class="progress-bar bg-success"
-
-                        role="progressbar"
-
-                         style="width:0%;">
-
-                </div>
-
-            </div>
+                    <div
+                        id="budgetAlert"
+                        class="mt-3 small"
+                    ></div>
 
                     <small>
                         本月預算使用狀況
@@ -272,6 +266,159 @@
                 </div>
 
             </article>
+
+        </section>
+
+        <!-- 快速新增交易 -->
+        <section class="quick-entry-section">
+
+            <div class="dashboard-panel quick-entry-panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <p class="panel-label">
+                            QUICK ENTRY
+                        </p>
+
+                        <h4>
+                            ⚡ 快速新增交易
+                        </h4>
+
+                    </div>
+
+                    <a
+                        href="transaction.html"
+                        class="panel-link"
+                    >
+                        完整記帳 →
+                    </a>
+
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="quickDate"
+                            class="form-label"
+                        >
+                            日期
+                        </label>
+
+                        <input
+                            type="date"
+                            id="quickDate"
+                            class="form-control"
+                        >
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="quickType"
+                            class="form-label"
+                        >
+                            類型
+                        </label>
+
+                        <select
+                            id="quickType"
+                            class="form-select"
+                        >
+                            <option value="支出">支出</option>
+                            <option value="收入">收入</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="quickCategory"
+                            class="form-label"
+                        >
+                            分類
+                        </label>
+
+                        <select
+                            id="quickCategory"
+                            class="form-select"
+                        >
+                            <option value="餐飲">餐飲</option>
+                            <option value="交通">交通</option>
+                            <option value="購物">購物</option>
+                            <option value="娛樂">娛樂</option>
+                            <option value="醫療">醫療</option>
+                            <option value="薪資">薪資</option>
+                            <option value="獎金">獎金</option>
+                            <option value="其他">其他</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="quickItem"
+                            class="form-label"
+                        >
+                            項目
+                        </label>
+
+                        <input
+                            type="text"
+                            id="quickItem"
+                            class="form-control"
+                            placeholder="例如：午餐"
+                        >
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="quickAmount"
+                            class="form-label"
+                        >
+                            金額
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quickAmount"
+                            class="form-control"
+                            min="1"
+                            step="1"
+                            placeholder="例如：120"
+                        >
+
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+
+                        <button
+                            type="button"
+                            id="quickAddBtn"
+                            class="btn btn-primary w-100"
+                        >
+                            ＋ 新增
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="quickEntryMessage"
+                    class="mt-3"
+                    style="display: none;"
+                ></div>
+
+            </div>
 
         </section>
 
@@ -314,7 +461,7 @@
 
             </section>
 
-            <!-- 每人尚未收回代墊 -->
+            <!-- 尚未收回代墊 -->
             <section class="transaction dashboard-panel">
 
                 <div class="panel-header">
@@ -354,6 +501,9 @@
 
 <!-- 預算模組 -->
 <script src="js/budget.js"></script>
+
+<!-- 快速記帳模組 -->
+<script src="js/quick-entry.js"></script>
 
 </body>
 
