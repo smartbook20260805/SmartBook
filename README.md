@@ -1,74 +1,36 @@
 # 📘 SmartBook
 
-SmartBook 是一套使用 HTML、CSS、JavaScript 開發的個人記帳系統。
+一套使用 HTML、CSS、JavaScript 開發的個人記帳系統。
 
----
+## 功能
 
-## 🚀 目前功能
+- ✅ 收支記帳
+- ✅ 收入 / 支出分類
+- ✅ 代墊管理
+- ✅ 已收回 / 未收回
+- ✅ Dashboard
+- ✅ 最近交易
+- ✅ 每人未收回代墊
+- ✅ 搜尋與篩選
+- ✅ 圓餅圖
+- ✅ 長條圖
+- ✅ Excel 匯出
+- ✅ PWA
+- ✅ Git 版本控制
 
-### 💰 收支管理
-- 收入
-- 支出
-- 分類
-- 備註
-
-### 🧾 代墊管理
-- 代墊人
-- 已收回 / 未收回
-- 收回日期
-
-### 📊 Dashboard
-- 收入
-- 支出
-- 餘額
-- 未收回代墊
-
-### 📈 報表
-- 月報表
-- 分類統計
-- 圓餅圖
-- 長條圖
-
-### 📄 匯出
-- Excel
-- PDF（開發中）
-
-### 🔍 搜尋
-- 關鍵字
-- 類型
-- 分類
-- 日期
-
-### 📱 PWA
-- 手機安裝
-- Service Worker
-
----
-
-## 🛠 開發工具
+## 開發工具
 
 - HTML5
 - CSS3
 - JavaScript
 - Bootstrap 5
 - Chart.js
-- jsPDF
-- Git
+- SheetJS
+- jsPDF（開發中）
 
----
+## 下一版本
 
-## 📅 專案版本
-
-目前版本：
-
-SmartBook V3.1
-
----
-
-## 📌 後續規劃
-
-- PDF 完整報表
+- PDF 月報
+- JSON 備份
 - 深色模式
 - 預算管理
-- Firebase（未來）
-- LINE Bot（未來）
