@@ -769,3 +769,43 @@ body {
     }
 
 }
+
+/* ===============================
+   今日摘要
+   =============================== */
+
+.today-summary-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px 0;
+
+    border-bottom:1px solid var(--sb-border);
+
+}
+
+.today-summary-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.today-summary-label{
+
+    font-weight:700;
+
+    color:var(--sb-muted);
+
+}
+
+.today-summary-value{
+
+    font-size:18px;
+
+    font-weight:800;
+
+}

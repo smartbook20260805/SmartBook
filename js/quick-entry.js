@@ -167,13 +167,8 @@ function refreshQuickEntryDashboard() {
         updateBudgetDashboard();
     }
 
-    // ⭐ 更新本月支出 Top5
-    if (typeof loadExpenseTopFive === "function") {
-        loadExpenseTopFive();
-    }
-
-    if (typeof loadSevenDayTrendChart === "function") {
-        loadSevenDayTrendChart();
+    if (typeof refreshDashboardAnalytics === "function") {
+        refreshDashboardAnalytics();
     }
 
 }

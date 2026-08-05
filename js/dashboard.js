@@ -22,7 +22,95 @@ function getDashboardTransactions() {
     }
 }
 
-// 取得本月支出分類 Top 5
+// 取得本機日期 YYYY-MM-DD
+function getDashboardDateKey(date) {
+    const year = date.getFullYear();
+    const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+    const day =
+        String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+// ===============================
+// 今日摘要
+// ===============================
+function loadTodaySummary() {
+    const area =
+        document.getElementById("todaySummary");
+
+    if (!area) return;
+
+    const transactions =
+        getDashboardTransactions();
+
+    const todayKey =
+        getDashboardDateKey(new Date());
+
+    let todayIncome = 0;
+    let todayExpense = 0;
+
+    transactions.forEach(function (transaction) {
+        if (transaction.date !== todayKey) return;
+
+        const amount =
+            Number(transaction.amount) || 0;
+
+        if (transaction.type === "收入") {
+            todayIncome += amount;
+        }
+
+        if (transaction.type === "支出") {
+            todayExpense += amount;
+        }
+    });
+
+    const todayBalance =
+        todayIncome - todayExpense;
+
+    area.innerHTML = `
+        <div class="today-summary-item">
+            <span class="today-summary-label">
+                💰 今日收入
+            </span>
+
+            <strong class="today-summary-value text-success">
+                NT$ ${todayIncome.toLocaleString()}
+            </strong>
+        </div>
+
+        <div class="today-summary-item">
+            <span class="today-summary-label">
+                💸 今日支出
+            </span>
+
+            <strong class="today-summary-value text-danger">
+                NT$ ${todayExpense.toLocaleString()}
+            </strong>
+        </div>
+
+        <div class="today-summary-item">
+            <span class="today-summary-label">
+                💵 今日結餘
+            </span>
+
+            <strong
+                class="today-summary-value ${
+                    todayBalance >= 0
+                        ? "text-primary"
+                        : "text-danger"
+                }"
+            >
+                NT$ ${todayBalance.toLocaleString()}
+            </strong>
+        </div>
+    `;
+}
+
+// ===============================
+// 本月支出分類 Top 5
+// ===============================
 function getMonthlyExpenseTopFive() {
     const transactions =
         getDashboardTransactions();
@@ -121,16 +209,26 @@ function loadExpenseTopFive() {
         .join("");
 }
 
+// ===============================
+// 更新全部 Dashboard 分析
+// ===============================
+function refreshDashboardAnalytics() {
+    loadTodaySummary();
+    loadExpenseTopFive();
+
+    if (typeof loadSevenDayTrendChart === "function") {
+        loadSevenDayTrendChart();
+    }
+}
+
 // 頁面載入
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
-        loadExpenseTopFive();
-    }
+    refreshDashboardAnalytics
 );
 
-// 從其他頁面返回首頁時更新
+// 返回首頁時更新
 window.addEventListener(
     "pageshow",
-    loadExpenseTopFive
+    refreshDashboardAnalytics
 );
