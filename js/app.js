@@ -983,6 +983,58 @@ function loadSummaryChart() {
     });
 
 }
+// ===============================
+// 匯出 JSON 備份
+// ===============================
+function exportBackup() {
+
+    const transactions = getTransactions();
+
+    const backupData = {
+        app: "SmartBook",
+        version: "V4.1",
+        exportedAt: new Date().toISOString(),
+        transactions
+    };
+
+    const jsonText = JSON.stringify(
+        backupData,
+        null,
+        2
+    );
+
+    const blob = new Blob(
+        [jsonText],
+        { type: "application/json" }
+    );
+
+    const downloadUrl =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    const today = new Date();
+
+    const fileDate = [
+        today.getFullYear(),
+        String(today.getMonth() + 1).padStart(2, "0"),
+        String(today.getDate()).padStart(2, "0")
+    ].join("-");
+
+    link.href = downloadUrl;
+
+    link.download =
+        `smartbook_backup_${fileDate}.json`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(downloadUrl);
+}
 
 // ===============================
 // 網頁載入完成
@@ -1032,7 +1084,17 @@ if (searchKeyword) {
             filterTransactions();
 
         }
+const backupBtn =
+    document.getElementById("backupBtn");
 
+if (backupBtn) {
+
+    backupBtn.addEventListener(
+        "click",
+        exportBackup
+    );
+
+}
     });
 
 } 
