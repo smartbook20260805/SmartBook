@@ -44,11 +44,19 @@
     <aside class="sidebar">
 
         <div class="sidebar-header">
-            <h2 class="logo">📘 SmartBook</h2>
-            <p class="sidebar-subtitle">智慧記帳系統</p>
+
+            <h2 class="logo">
+                📘 SmartBook
+            </h2>
+
+            <p class="sidebar-subtitle">
+                智慧記帳系統
+            </p>
+
         </div>
 
         <nav>
+
             <ul class="menu">
 
                 <li class="active">
@@ -76,12 +84,13 @@
                 </li>
 
                 <li>
-                   <a href="setting.html">
-                       ⚙️ 系統設定
-                   </a>
+                    <a href="setting.html">
+                        ⚙️ 系統設定
+                    </a>
                 </li>
 
             </ul>
+
         </nav>
 
     </aside>
@@ -93,11 +102,19 @@
         <header class="topbar">
 
             <div>
-                <p class="page-label">SMARTBOOK</p>
-                <h1>財務總覽</h1>
-                <p class="page-description">
-                    查看目前的收支、代墊與餘額狀況
+
+                <p class="page-label">
+                    SMARTBOOK
                 </p>
+
+                <h1>
+                    財務總覽
+                </h1>
+
+                <p class="page-description">
+                    查看目前的收支、代墊、餘額與預算狀況
+                </p>
+
             </div>
 
             <a
@@ -112,66 +129,146 @@
         <!-- Dashboard 統計卡 -->
         <section class="dashboard">
 
+            <!-- 收入 -->
             <article class="card-box summary-card income-card">
 
-                <div class="card-icon">💰</div>
+                <div class="card-icon">
+                    💰
+                </div>
 
                 <div>
-                    <h5>收入</h5>
+
+                    <h5>
+                        收入
+                    </h5>
 
                     <p id="incomeTotal">
                         NT$ 0
                     </p>
 
-                    <small>所有收入總額</small>
+                    <small>
+                        所有收入總額
+                    </small>
+
                 </div>
 
             </article>
 
+            <!-- 支出 -->
             <article class="card-box summary-card expense-card">
 
-                <div class="card-icon">💸</div>
+                <div class="card-icon">
+                    💸
+                </div>
 
                 <div>
-                    <h5>支出</h5>
+
+                    <h5>
+                        支出
+                    </h5>
 
                     <p id="expenseTotal">
                         NT$ 0
                     </p>
 
-                    <small>所有支出總額</small>
+                    <small>
+                        所有支出總額
+                    </small>
+
                 </div>
 
             </article>
 
+            <!-- 代墊 -->
             <article class="card-box summary-card advance-card">
 
-                <div class="card-icon">🧾</div>
+                <div class="card-icon">
+                    🧾
+                </div>
 
                 <div>
-                    <h5>未收回代墊</h5>
+
+                    <h5>
+                        未收回代墊
+                    </h5>
 
                     <p id="advanceTotal">
                         NT$ 0
                     </p>
 
-                    <small>目前尚未收回</small>
+                    <small>
+                        目前尚未收回
+                    </small>
+
                 </div>
 
             </article>
 
+            <!-- 餘額 -->
             <article class="card-box summary-card balance-card">
 
-                <div class="card-icon">💵</div>
+                <div class="card-icon">
+                    💵
+                </div>
 
                 <div>
-                    <h5>目前餘額</h5>
+
+                    <h5>
+                        目前餘額
+                    </h5>
 
                     <p id="balanceTotal">
                         NT$ 0
                     </p>
 
-                    <small>收入扣除支出與代墊</small>
+                    <small>
+                        收入扣除支出與代墊
+                    </small>
+
+                </div>
+
+            </article>
+
+            <!-- 本月預算 -->
+            <article class="card-box summary-card budget-card">
+
+                <div class="card-icon">
+                    📊
+                </div>
+
+                <div class="budget-card-content">
+
+                    <h5>
+                        本月預算
+                    </h5>
+
+                    <div id="budgetStatus">
+
+                       尚未設定
+
+                    </div>
+
+                <div
+                         class="progress mt-3"
+                        style="height:12px;">
+
+                <div
+                         id="budgetProgress"
+
+                         class="progress-bar bg-success"
+
+                        role="progressbar"
+
+                         style="width:0%;">
+
+                </div>
+
+            </div>
+
+                    <small>
+                        本月預算使用狀況
+                    </small>
+
                 </div>
 
             </article>
@@ -187,8 +284,15 @@
                 <div class="panel-header">
 
                     <div>
-                        <p class="panel-label">RECENT</p>
-                        <h4>最近交易</h4>
+
+                        <p class="panel-label">
+                            RECENT
+                        </p>
+
+                        <h4>
+                            最近交易
+                        </h4>
+
                     </div>
 
                     <a
@@ -201,9 +305,11 @@
                 </div>
 
                 <div id="recentTransactions">
+
                     <p class="empty-message">
                         尚無交易資料
                     </p>
+
                 </div>
 
             </section>
@@ -214,16 +320,25 @@
                 <div class="panel-header">
 
                     <div>
-                        <p class="panel-label">ADVANCES</p>
-                        <h4>每人尚未收回代墊</h4>
+
+                        <p class="panel-label">
+                            ADVANCES
+                        </p>
+
+                        <h4>
+                            每人尚未收回代墊
+                        </h4>
+
                     </div>
 
                 </div>
 
                 <div id="advanceSummary">
+
                     <p class="empty-message">
                         尚無未收回代墊
                     </p>
+
                 </div>
 
             </section>
@@ -234,7 +349,11 @@
 
 </div>
 
+<!-- 核心程式 -->
 <script src="js/app.js"></script>
+
+<!-- 預算模組 -->
+<script src="js/budget.js"></script>
 
 </body>
 

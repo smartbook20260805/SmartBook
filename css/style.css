@@ -661,3 +661,24 @@ body {
         font-size: 24px;
     }
 }
+/* ===============================
+   預算卡片
+   =============================== */
+
+.budget-card .card-icon {
+    background: #ede9fe;
+}
+
+.budget-card-content {
+    min-width: 0;
+}
+
+#budgetStatus {
+    margin-bottom: 7px;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+#budgetStatus strong {
+    color: var(--sb-text);
+}
