@@ -853,40 +853,46 @@ function loadExpenseChart() {
 
     chartCanvas.style.display = "block";
 
-    new Chart(chartCanvas, {
-        type: "pie",
+    const existingChart = Chart.getChart(chartCanvas);
 
-        data: {
-            labels: labels,
+if (existingChart) {
+    existingChart.destroy();
+}
 
-            datasets: [{
-                label: "本月支出",
-                data: values
-            }]
-        },
+new Chart(chartCanvas, {
+    type: "pie",
 
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
+    data: {
+        labels: labels,
 
-            plugins: {
-                legend: {
-                    position: "bottom"
-                },
+        datasets: [{
+            label: "本月支出",
+            data: values
+        }]
+    },
 
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const value = Number(context.raw) || 0;
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
 
-                            return `${context.label}：NT$ ${value.toLocaleString()}`;
-                        }
+        plugins: {
+            legend: {
+                position: "bottom"
+            },
+
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        const value = Number(context.raw) || 0;
+
+                        return `${context.label}：NT$ ${value.toLocaleString()}`;
                     }
                 }
             }
         }
-    });
-}
+    }
+});
+} // 
 // ===============================
 // 收入 / 支出 / 代墊 長條圖
 // ===============================
@@ -936,7 +942,13 @@ function loadSummaryChart() {
 
     });
 
-    new Chart(canvas, {
+    const existingChart = Chart.getChart(canvas);
+
+if (existingChart) {
+    existingChart.destroy();
+}
+
+new Chart(canvas, {
 
         type: "bar",
 
@@ -1041,6 +1053,7 @@ function exportBackup() {
 // ===============================
 document.addEventListener("DOMContentLoaded", function () {
 
+    // 載入各頁面資料
     loadTransactions();
     updateDashboard();
     loadRecentTransactions();
@@ -1050,6 +1063,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadExpenseChart();
     loadSummaryChart();
 
+    // Excel 匯出
     const exportExcelButton =
         document.getElementById("exportExcel");
 
@@ -1060,81 +1074,77 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+    // 搜尋按鈕
     const searchBtn =
-    document.getElementById("searchBtn");
+        document.getElementById("searchBtn");
 
-const clearSearchBtn =
-    document.getElementById("clearSearchBtn");
-
-if (searchBtn) {
-    searchBtn.addEventListener(
-        "click",
-        filterTransactions
-    );
-}
-const searchKeyword =
-    document.getElementById("searchKeyword");
-
-if (searchKeyword) {
-
-    searchKeyword.addEventListener("keypress", function (e) {
-
-        if (e.key === "Enter") {
-
-            filterTransactions();
-
-        }
-const backupBtn =
-    document.getElementById("backupBtn");
-
-if (backupBtn) {
-
-    backupBtn.addEventListener(
-        "click",
-        exportBackup
-    );
-
-}
-    });
-
-} 
-
-if (clearSearchBtn) {
-
-    clearSearchBtn.addEventListener(
-        "click",
-        function () {
-
-            document.getElementById("searchKeyword").value = "";
-            document.getElementById("filterType").value = "";
-            document.getElementById("filterCategory").value = "";
-            document.getElementById("filterStartDate").value = "";
-            document.getElementById("filterEndDate").value = "";
-
-            loadTransactions();
-        }
-    );
-}
-
-});
-const filterIds = [
-    "filterType",
-    "filterCategory",
-    "filterStartDate",
-    "filterEndDate"
-];
-
-filterIds.forEach(id => {
-
-    const element = document.getElementById(id);
-
-    if (element) {
-
-        element.addEventListener("change", filterTransactions);
-
+    if (searchBtn) {
+        searchBtn.addEventListener(
+            "click",
+            filterTransactions
+        );
     }
 
+    // 按 Enter 搜尋
+    const searchKeyword =
+        document.getElementById("searchKeyword");
+
+    if (searchKeyword) {
+        searchKeyword.addEventListener(
+            "keypress",
+            function (event) {
+
+                if (event.key === "Enter") {
+                    filterTransactions();
+                }
+
+            }
+        );
+    }
+
+    // 清除搜尋
+    const clearSearchBtn =
+        document.getElementById("clearSearchBtn");
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener(
+            "click",
+            function () {
+
+                document.getElementById("searchKeyword").value = "";
+                document.getElementById("filterType").value = "";
+                document.getElementById("filterCategory").value = "";
+                document.getElementById("filterStartDate").value = "";
+                document.getElementById("filterEndDate").value = "";
+
+                loadTransactions();
+            }
+        );
+    }
+
+    // 改變篩選條件時自動搜尋
+    const filterIds = [
+        "filterType",
+        "filterCategory",
+        "filterStartDate",
+        "filterEndDate"
+    ];
+
+    filterIds.forEach(function (id) {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.addEventListener(
+                "change",
+                filterTransactions
+            );
+        }
+
+    });
+
 });
+
 // ===============================
 // 註冊 Service Worker
 // ===============================
