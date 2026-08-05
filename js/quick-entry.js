@@ -150,6 +150,7 @@ function resetQuickEntryForm() {
 
 // 更新首頁所有資料
 function refreshQuickEntryDashboard() {
+
     if (typeof updateDashboard === "function") {
         updateDashboard();
     }
@@ -165,6 +166,16 @@ function refreshQuickEntryDashboard() {
     if (typeof updateBudgetDashboard === "function") {
         updateBudgetDashboard();
     }
+
+    // ⭐ 更新本月支出 Top5
+    if (typeof loadExpenseTopFive === "function") {
+        loadExpenseTopFive();
+    }
+
+    if (typeof loadSevenDayTrendChart === "function") {
+        loadSevenDayTrendChart();
+    }
+
 }
 
 // 新增快速交易
