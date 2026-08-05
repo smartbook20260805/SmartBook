@@ -3,188 +3,236 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>SmartBook 智慧記帳</title>
+
     <link rel="icon" href="favicon.ico">
-    
+
+    <link
+        rel="manifest"
+        href="manifest.json"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0d6efd"
+    >
+
     <!-- Bootstrap -->
-    <link 
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-    rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d6efd">
-    
-    <!-- 自訂CSS -->
-   <link rel="stylesheet" href="css/style.css">
-
+    <!-- SmartBook CSS -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 </head>
-
 
 <body>
 
-
 <div class="app">
 
-
-    <!-- 左側選單 -->
+    <!-- 側邊選單 -->
     <aside class="sidebar">
 
-        <h2 class="logo">
-            📘 SmartBook
-        </h2>
+        <div class="sidebar-header">
+            <h2 class="logo">📘 SmartBook</h2>
+            <p class="sidebar-subtitle">智慧記帳系統</p>
+        </div>
 
+        <nav>
+            <ul class="menu">
 
-        <ul class="menu">
+                <li class="active">
+                    <a href="index.html">
+                        🏠 首頁
+                    </a>
+                </li>
 
-            <li>
-                🏠 首頁
-            </li>
+                <li>
+                    <a href="transaction.html">
+                        💰 收支記帳
+                    </a>
+                </li>
 
-            <li>
-<a href="transaction.html">💰 收支記帳</a>
-            </li>
+                <li>
+                    <a href="transaction.html">
+                        🧾 代墊管理
+                    </a>
+                </li>
 
-            <li>
-                🧾 代墊管理
-            </li>
+                <li>
+                    <a href="report.html">
+                        📊 報表分析
+                    </a>
+                </li>
 
-            <li>
-               <a href="report.html">
-                   📊 報表分析
-               </a>
-            </li>
+                <li>
+                    <a href="#">
+                        ⚙️ 系統設定
+                    </a>
+                </li>
 
-            <li>
-                ⚙️ 系統設定
-            </li>
-
-        </ul>
-
+            </ul>
+        </nav>
 
     </aside>
 
-
-
-
-
-    <!-- 右側內容 -->
-
+    <!-- 主要內容 -->
     <main class="content">
 
-
-        <!-- 上方標題 -->
-
+        <!-- 頂部標題 -->
         <header class="topbar">
 
-            <h3>
-                Dashboard
-            </h3>
+            <div>
+                <p class="page-label">SMARTBOOK</p>
+                <h1>財務總覽</h1>
+                <p class="page-description">
+                    查看目前的收支、代墊與餘額狀況
+                </p>
+            </div>
 
+            <a
+                href="transaction.html"
+                class="btn btn-primary"
+            >
+                ＋ 新增交易
+            </a>
 
         </header>
 
-
-
-        <!-- Dashboard內容 -->
-
-
+        <!-- Dashboard 統計卡 -->
         <section class="dashboard">
 
+            <article class="card-box summary-card income-card">
 
-            <div class="card-box">
+                <div class="card-icon">💰</div>
 
-                <h5>
-                    💰 收入
-                </h5>
+                <div>
+                    <h5>收入</h5>
 
-                <p id="incomeTotal">
-                    NT$ 0
-                 </p>
+                    <p id="incomeTotal">
+                        NT$ 0
+                    </p>
 
-            </div>
+                    <small>所有收入總額</small>
+                </div>
 
+            </article>
 
+            <article class="card-box summary-card expense-card">
 
+                <div class="card-icon">💸</div>
 
-            <div class="card-box">
+                <div>
+                    <h5>支出</h5>
 
-                <h5>
-                    💸 支出
-                </h5>
+                    <p id="expenseTotal">
+                        NT$ 0
+                    </p>
 
-                <p id="expenseTotal">
-                    NT$ 0
-                 </p>
+                    <small>所有支出總額</small>
+                </div>
 
-            </div>
+            </article>
 
+            <article class="card-box summary-card advance-card">
 
+                <div class="card-icon">🧾</div>
 
+                <div>
+                    <h5>未收回代墊</h5>
 
-            <div class="card-box">
+                    <p id="advanceTotal">
+                        NT$ 0
+                    </p>
 
-                <h5>
-                    🧾 代墊
-                </h5>
+                    <small>目前尚未收回</small>
+                </div>
 
-               <p id="advanceTotal">
-                    NT$ 0
-                </p>
+            </article>
 
-            </div>
+            <article class="card-box summary-card balance-card">
 
+                <div class="card-icon">💵</div>
 
+                <div>
+                    <h5>目前餘額</h5>
 
+                    <p id="balanceTotal">
+                        NT$ 0
+                    </p>
 
-            <div class="card-box">
+                    <small>收入扣除支出與代墊</small>
+                </div>
 
-                <h5>
-                    💵 餘額
-                </h5>
-
-                <p>
-                    NT$ 0
-                 <p id="balanceTotal">NT$ 0</p>
-
-            </div>
-
-
-
-        </section>
-
-
-
-
-        <section class="transaction">
-
-            <h4>最近交易</h4>
-
-            <div id="recentTransactions">
-                 <p>尚無資料</p>
-             </div>
+            </article>
 
         </section>
 
-        <section class="transaction mt-4">
+        <!-- 首頁資訊區 -->
+        <section class="dashboard-sections">
 
-            <h4>每人尚未收回代墊</h4>
+            <!-- 最近交易 -->
+            <section class="transaction dashboard-panel">
 
-            <div id="advanceSummary">
-                <p>尚無未收回代墊</p>
-            </div>
+                <div class="panel-header">
 
-</section>
+                    <div>
+                        <p class="panel-label">RECENT</p>
+                        <h4>最近交易</h4>
+                    </div>
 
+                    <a
+                        href="transaction.html"
+                        class="panel-link"
+                    >
+                        查看全部 →
+                    </a>
 
+                </div>
+
+                <div id="recentTransactions">
+                    <p class="empty-message">
+                        尚無交易資料
+                    </p>
+                </div>
+
+            </section>
+
+            <!-- 每人尚未收回代墊 -->
+            <section class="transaction dashboard-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <p class="panel-label">ADVANCES</p>
+                        <h4>每人尚未收回代墊</h4>
+                    </div>
+
+                </div>
+
+                <div id="advanceSummary">
+                    <p class="empty-message">
+                        尚無未收回代墊
+                    </p>
+                </div>
+
+            </section>
+
+        </section>
 
     </main>
 
-
 </div>
-
-
 
 <script src="js/app.js"></script>
 

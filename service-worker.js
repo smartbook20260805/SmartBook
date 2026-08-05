@@ -1,4 +1,4 @@
-const CACHE_NAME = "smartbook-v1";
+const CACHE_NAME = "smartbook-v2";
 
 const FILES_TO_CACHE = [
     "./",
@@ -10,7 +10,7 @@ const FILES_TO_CACHE = [
     "./manifest.json"
 ];
 
-// 安裝 Service Worker
+// 安裝
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -20,27 +20,38 @@ self.addEventListener("install", event => {
     self.skipWaiting();
 });
 
-// 啟用新版 Service Worker
+// 刪除舊快取
 self.addEventListener("activate", event => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
+        caches.keys().then(cacheNames =>
+            Promise.all(
                 cacheNames
                     .filter(name => name !== CACHE_NAME)
                     .map(name => caches.delete(name))
-            );
-        })
+            )
+        )
     );
 
     self.clients.claim();
 });
 
-// 優先讀取快取，沒有才連網
+// HTML、CSS、JS 優先抓最新版；離線時才使用快取
 self.addEventListener("fetch", event => {
+
+    if (event.request.method !== "GET") return;
+
     event.respondWith(
-        caches.match(event.request)
-            .then(cachedResponse => {
-                return cachedResponse || fetch(event.request);
+        fetch(event.request)
+            .then(response => {
+
+                const responseCopy = response.clone();
+
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseCopy);
+                });
+
+                return response;
             })
+            .catch(() => caches.match(event.request))
     );
 });

@@ -1076,6 +1076,7 @@ filterIds.forEach(id => {
 // ===============================
 // 註冊 Service Worker
 // ===============================
+/*
 if ("serviceWorker" in navigator) {
 
     window.addEventListener("load", function () {
@@ -1092,3 +1093,25 @@ if ("serviceWorker" in navigator) {
     });
 
 }
+*/
+// ===============================
+// 返回頁面時重新整理畫面資料
+// ===============================
+window.addEventListener("pageshow", function () {
+
+    loadTransactions();
+    updateDashboard();
+    loadRecentTransactions();
+    loadAdvanceSummary();
+    loadMonthlyReport();
+    loadCategorySummary();
+
+    if (typeof loadExpenseChart === "function") {
+        loadExpenseChart();
+    }
+
+    if (typeof loadSummaryChart === "function") {
+        loadSummaryChart();
+    }
+
+});
