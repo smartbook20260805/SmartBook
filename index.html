@@ -579,6 +579,56 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 月曆記帳 -->
+<section class="transaction dashboard-panel calendar-panel">
+
+    <div class="panel-header">
+
+        <div>
+            <p class="panel-label">CALENDAR</p>
+            <h4>📅 月曆記帳</h4>
+        </div>
+
+        <div class="calendar-controls">
+
+            <button
+                type="button"
+                id="prevMonthBtn"
+                class="btn btn-outline-secondary btn-sm"
+            >
+                ← 上一月
+            </button>
+
+            <strong id="calendarTitle">
+                年 月
+            </strong>
+
+            <button
+                type="button"
+                id="nextMonthBtn"
+                class="btn btn-outline-secondary btn-sm"
+            >
+                下一月 →
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="calendar-weekdays">
+        <div>日</div>
+        <div>一</div>
+        <div>二</div>
+        <div>三</div>
+        <div>四</div>
+        <div>五</div>
+        <div>六</div>
+    </div>
+
+    <div id="calendarGrid" class="calendar-grid"></div>
+
+</section>
+
 <!-- 核心程式 -->
 <script src="js/app.js"></script>
 
@@ -596,6 +646,8 @@
 
 <!-- 最近 7 天趨勢圖模組 -->
 <script src="js/trend-chart.js"></script>
+
+<script src="js/calendar.js"></script>
 
 </body>
 

@@ -170,6 +170,10 @@ function refreshQuickEntryDashboard() {
         refreshDashboardAnalytics();
     }
 
+    if (typeof refreshCalendar === "function") {
+        refreshCalendar();
+    }
+
 }
 
 // 新增快速交易
