@@ -1180,3 +1180,276 @@ window.addEventListener("pageshow", function () {
     }
 
 });
+// ===============================
+// Firebase Google 登入介面
+// ===============================
+
+// 更新登入畫面
+function updateFirebaseAuthUI(user) {
+
+    const userEmail =
+        document.getElementById("userEmail");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    // 其他頁面沒有登入元件時，直接略過
+    if (!userEmail || !loginBtn || !logoutBtn) {
+        return;
+    }
+
+    if (user) {
+
+        userEmail.textContent =
+            user.email || "已登入";
+
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+
+    } else {
+
+        userEmail.textContent = "尚未登入";
+
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+
+    }
+
+}
+
+
+// Firebase 雲端資料更新後，重新整理各區塊
+function refreshSmartBookAfterCloudSync() {
+
+    if (typeof loadTransactions === "function") {
+        loadTransactions();
+    }
+
+    if (typeof updateDashboard === "function") {
+        updateDashboard();
+    }
+
+    if (typeof loadRecentTransactions === "function") {
+        loadRecentTransactions();
+    }
+
+    if (typeof loadAdvanceSummary === "function") {
+        loadAdvanceSummary();
+    }
+
+    if (typeof loadMonthlyReport === "function") {
+        loadMonthlyReport();
+    }
+
+    if (typeof loadCategorySummary === "function") {
+        loadCategorySummary();
+    }
+
+    if (typeof loadExpenseChart === "function") {
+        loadExpenseChart();
+    }
+
+    if (typeof loadSummaryChart === "function") {
+        loadSummaryChart();
+    }
+
+    if (typeof updateBudgetDashboard === "function") {
+        updateBudgetDashboard();
+    }
+
+    if (typeof refreshCategorySelects === "function") {
+        refreshCategorySelects();
+    }
+
+    if (typeof refreshDashboardAnalytics === "function") {
+        refreshDashboardAnalytics();
+    }
+
+    if (typeof refreshCalendar === "function") {
+        refreshCalendar();
+    }
+
+}
+
+
+// 綁定登入與登出按鈕
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const loginBtn =
+            document.getElementById("loginBtn");
+
+        const logoutBtn =
+            document.getElementById("logoutBtn");
+
+        if (loginBtn) {
+
+            loginBtn.addEventListener(
+                "click",
+                async function () {
+
+                    if (
+                        !window.smartbookFirebase ||
+                        typeof window.smartbookFirebase
+                            .signInWithGoogle !== "function"
+                    ) {
+                        alert(
+                            "Firebase 尚未載入完成，請稍後再試。"
+                        );
+
+                        return;
+                    }
+
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = "登入中...";
+
+                    try {
+
+                        await window.smartbookFirebase
+                            .signInWithGoogle();
+
+                    } catch (error) {
+
+                        console.error(
+                            "Google 登入錯誤：",
+                            error
+                        );
+
+                        if (
+                            error.code ===
+                            "auth/popup-closed-by-user"
+                        ) {
+                            alert("Google 登入視窗已關閉。");
+                        } else if (
+                            error.code ===
+                            "auth/popup-blocked"
+                        ) {
+                            alert(
+                                "瀏覽器封鎖了登入視窗，請允許彈出式視窗後再試。"
+                            );
+                        } else if (
+                            error.code ===
+                            "auth/unauthorized-domain"
+                        ) {
+                            alert(
+                                "目前網站網址尚未加入 Firebase 授權網域。"
+                            );
+                        } else {
+                            alert(
+                                "Google 登入失敗，請查看 Console 錯誤訊息。"
+                            );
+                        }
+
+                    } finally {
+
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = "Google 登入";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        if (logoutBtn) {
+
+            logoutBtn.addEventListener(
+                "click",
+                async function () {
+
+                    if (
+                        !window.smartbookFirebase ||
+                        typeof window.smartbookFirebase
+                            .signOutGoogle !== "function"
+                    ) {
+                        return;
+                    }
+
+                    const confirmed =
+                        window.confirm(
+                            "確定要登出 Google 帳號嗎？"
+                        );
+
+                    if (!confirmed) return;
+
+                    logoutBtn.disabled = true;
+                    logoutBtn.textContent = "登出中...";
+
+                    try {
+
+                        await window.smartbookFirebase
+                            .signOutGoogle();
+
+                    } catch (error) {
+
+                        console.error(
+                            "Google 登出錯誤：",
+                            error
+                        );
+
+                        alert("登出失敗，請稍後再試。");
+
+                    } finally {
+
+                        logoutBtn.disabled = false;
+                        logoutBtn.textContent = "登出";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // Firebase 若已載入，先取得目前登入狀態
+        if (
+            window.smartbookFirebase &&
+            typeof window.smartbookFirebase
+                .getCurrentUser === "function"
+        ) {
+            updateFirebaseAuthUI(
+                window.smartbookFirebase
+                    .getCurrentUser()
+            );
+        }
+
+    }
+);
+
+
+// Firebase 登入狀態改變
+window.addEventListener(
+    "smartbook-auth-changed",
+    function (event) {
+
+        const user =
+            event.detail
+                ? event.detail.user
+                : null;
+
+        updateFirebaseAuthUI(user);
+
+    }
+);
+
+
+// Firebase 雲端資料下載完成
+window.addEventListener(
+    "smartbook-cloud-updated",
+    function () {
+
+        console.log(
+            "收到 Firebase 雲端更新，重新整理 SmartBook"
+        );
+
+        refreshSmartBookAfterCloudSync();
+
+    }
+);

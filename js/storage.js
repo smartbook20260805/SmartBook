@@ -47,12 +47,18 @@ function getTransactions() {
 function saveTransactions(data) {
 
     localStorage.setItem(
-
         STORAGE_KEYS.transactions,
-
         JSON.stringify(data)
-
     );
+
+    if (
+        window.smartbookFirebase &&
+        typeof window.smartbookFirebase
+            .queueCloudSave === "function"
+    ) {
+        window.smartbookFirebase
+            .queueCloudSave();
+    }
 
 }
 
@@ -77,12 +83,18 @@ function getBudget() {
 function saveBudget(value) {
 
     localStorage.setItem(
-
         STORAGE_KEYS.monthlyBudget,
-
         String(value)
-
     );
+
+    if (
+        window.smartbookFirebase &&
+        typeof window.smartbookFirebase
+            .queueCloudSave === "function"
+    ) {
+        window.smartbookFirebase
+            .queueCloudSave();
+    }
 
 }
 
@@ -114,11 +126,17 @@ function getCategoryStorage() {
 function saveCategoryStorage(data) {
 
     localStorage.setItem(
-
         STORAGE_KEYS.categories,
-
         JSON.stringify(data)
-
     );
+
+    if (
+        window.smartbookFirebase &&
+        typeof window.smartbookFirebase
+            .queueCloudSave === "function"
+    ) {
+        window.smartbookFirebase
+            .queueCloudSave();
+    }
 
 }

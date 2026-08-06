@@ -104,33 +104,56 @@
     <!-- 主要內容 -->
     <main class="content">
 
-        <!-- 頂部標題 -->
-        <header class="topbar">
+      <!-- 頂部標題 -->
+<header class="topbar">
 
-            <div>
+    <div>
 
-                <p class="page-label">
-                    SMARTBOOK
-                </p>
+        <p class="page-label">
+            SMARTBOOK
+        </p>
 
-                <h1>
-                    財務總覽
-                </h1>
+        <h1>
+            財務總覽
+        </h1>
 
-                <p class="page-description">
-                    查看目前的收支、代墊、餘額與預算狀況
-                </p>
+        <p class="page-description">
+            查看目前的收支、代墊、餘額與預算狀況
+        </p>
 
-            </div>
+    </div>
 
-            <a
-                href="transaction.html"
-                class="btn btn-primary"
-            >
-                ＋ 新增交易
-            </a>
+    <div style="display:flex;align-items:center;gap:10px;">
 
-        </header>
+        <span id="userEmail">
+            尚未登入
+        </span>
+
+        <button
+            id="loginBtn"
+            class="btn btn-success"
+        >
+            Google 登入
+        </button>
+
+        <button
+            id="logoutBtn"
+            class="btn btn-outline-danger"
+            style="display:none;"
+        >
+            登出
+        </button>
+
+        <a
+            href="transaction.html"
+            class="btn btn-primary"
+        >
+            ＋ 新增交易
+        </a>
+
+    </div>
+
+</header>
 
         <!-- Dashboard 統計卡 -->
         <section class="dashboard">
@@ -674,6 +697,12 @@
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase 雲端模組 -->
+<script
+    type="module"
+    src="js/firebase.js">
+</script>
 
 <!-- Storage 模組一定要最先載入 -->
 <script src="js/storage.js"></script>
