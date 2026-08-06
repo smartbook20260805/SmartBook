@@ -24,16 +24,22 @@
     >
 
     <!-- Bootstrap -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+>
 
-    <!-- SmartBook CSS -->
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+<!-- SmartBook CSS -->
+<link
+    rel="stylesheet"
+    href="css/style.css"
+>
+
+<!-- SmartBook Mobile CSS -->
+<link
+    rel="stylesheet"
+    href="css/mobile.css"
+>
 </head>
 
 <body>
@@ -492,144 +498,190 @@
 
         </section>
 
+        <section class="transaction dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <p class="panel-label">
+                        TOP EXPENSES
+                    </p>
+
+                    <h4>
+                        🏆 本月支出 Top 5
+                    </h4>
+                </div>
+
+            </div>
+
+            <div id="expenseTopFive">
+
+                <p class="empty-message">
+                    本月尚無支出資料
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- 今日摘要 -->
+        <section class="transaction dashboard-panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <p class="panel-label">
+                        TODAY
+                    </p>
+
+                    <h4>
+                        📅 今日摘要
+                    </h4>
+
+                </div>
+
+            </div>
+
+            <div id="todaySummary">
+
+                <p class="empty-message">
+
+                    今天尚無交易
+
+                </p>
+
+            </div>
+
+        </section>
+
+        <!-- 最近 7 天收支趨勢 -->
+        <section class="transaction dashboard-panel trend-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <p class="panel-label">
+                        7 DAY TREND
+                    </p>
+
+                    <h4>
+                        📈 最近 7 天收支趨勢
+                    </h4>
+                </div>
+
+            </div>
+
+            <div class="trend-chart-container">
+                <canvas id="sevenDayTrendChart"></canvas>
+            </div>
+
+        </section>
+
+        <!-- 月曆記帳 -->
+        <section id="calendarSection" class="transaction dashboard-panel calendar-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <p class="panel-label">CALENDAR</p>
+                    <h4>📅 月曆記帳</h4>
+                </div>
+
+                <div class="calendar-controls">
+
+                    <button
+                        type="button"
+                        id="prevMonthBtn"
+                        class="btn btn-outline-secondary btn-sm"
+                    >
+                        ← 上一月
+                    </button>
+
+                    <strong id="calendarTitle">
+                        年 月
+                    </strong>
+
+                    <button
+                        type="button"
+                        id="nextMonthBtn"
+                        class="btn btn-outline-secondary btn-sm"
+                    >
+                        下一月 →
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="calendar-weekdays">
+                <div>日</div>
+                <div>一</div>
+                <div>二</div>
+                <div>三</div>
+                <div>四</div>
+                <div>五</div>
+                <div>六</div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid"></div>
+
+        </section>
+
+        <!-- 手機浮動新增按鈕 -->
+        <a
+            href="transaction.html"
+            class="mobile-fab"
+            aria-label="新增交易"
+            title="新增交易"
+        >
+            ＋
+        </a>
+
     </main>
 
 </div>
 
-<!-- 本月支出 Top 5 -->
-<section class="transaction dashboard-panel">
+<!-- 手機底部導覽列 -->
+<nav class="mobile-bottom-nav" aria-label="手機主要導覽">
 
-    <div class="panel-header">
+    <a href="index.html" class="active">
+        <span>🏠</span>
+        <span>首頁</span>
+    </a>
 
-        <div>
-            <p class="panel-label">
-                TOP EXPENSES
-            </p>
+    <a href="transaction.html">
+        <span>💰</span>
+        <span>記帳</span>
+    </a>
 
-            <h4>
-                🏆 本月支出 Top 5
-            </h4>
-        </div>
+    <a href="#calendarSection">
+        <span>📅</span>
+        <span>月曆</span>
+    </a>
 
-    </div>
+    <a href="report.html">
+        <span>📊</span>
+        <span>報表</span>
+    </a>
 
-    <div id="expenseTopFive">
+    <a href="setting.html">
+        <span>⚙️</span>
+        <span>設定</span>
+    </a>
 
-        <p class="empty-message">
-            本月尚無支出資料
-        </p>
+</nav>
 
-    </div>
-
-</section>
-
-<!-- 今日摘要 -->
-<section class="transaction dashboard-panel">
-
-    <div class="panel-header">
-
-        <div>
-
-            <p class="panel-label">
-                TODAY
-            </p>
-
-            <h4>
-                📅 今日摘要
-            </h4>
-
-        </div>
-
-    </div>
-
-    <div id="todaySummary">
-
-        <p class="empty-message">
-
-            今天尚無交易
-
-        </p>
-
-    </div>
-
-</section>
-
-<!-- 最近 7 天收支趨勢 -->
-<section class="transaction dashboard-panel trend-panel">
-
-    <div class="panel-header">
-
-        <div>
-            <p class="panel-label">
-                7 DAY TREND
-            </p>
-
-            <h4>
-                📈 最近 7 天收支趨勢
-            </h4>
-        </div>
-
-    </div>
-
-    <div class="trend-chart-container">
-        <canvas id="sevenDayTrendChart"></canvas>
-    </div>
-
-</section>
-
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 月曆記帳 -->
-<section class="transaction dashboard-panel calendar-panel">
+<!-- Storage 模組一定要最先載入 -->
+<script src="js/storage.js"></script>
 
-    <div class="panel-header">
+<!-- 共用工具 -->
+<script src="js/utils.js"></script>
 
-        <div>
-            <p class="panel-label">CALENDAR</p>
-            <h4>📅 月曆記帳</h4>
-        </div>
-
-        <div class="calendar-controls">
-
-            <button
-                type="button"
-                id="prevMonthBtn"
-                class="btn btn-outline-secondary btn-sm"
-            >
-                ← 上一月
-            </button>
-
-            <strong id="calendarTitle">
-                年 月
-            </strong>
-
-            <button
-                type="button"
-                id="nextMonthBtn"
-                class="btn btn-outline-secondary btn-sm"
-            >
-                下一月 →
-            </button>
-
-        </div>
-
-    </div>
-
-    <div class="calendar-weekdays">
-        <div>日</div>
-        <div>一</div>
-        <div>二</div>
-        <div>三</div>
-        <div>四</div>
-        <div>五</div>
-        <div>六</div>
-    </div>
-
-    <div id="calendarGrid" class="calendar-grid"></div>
-
-</section>
-
-<!-- 核心程式 -->
+<!-- SmartBook 核心程式 -->
 <script src="js/app.js"></script>
 
 <!-- 預算模組 -->
@@ -644,11 +696,11 @@
 <!-- Dashboard 模組 -->
 <script src="js/dashboard.js"></script>
 
-<!-- 最近 7 天趨勢圖模組 -->
+<!-- 最近 7 天趨勢圖 -->
 <script src="js/trend-chart.js"></script>
 
+<!-- 月曆模組 -->
 <script src="js/calendar.js"></script>
 
 </body>
-
 </html>
