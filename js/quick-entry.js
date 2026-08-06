@@ -68,39 +68,36 @@ function showQuickEntryMessage(message, type) {
         }, 2500);
 }
 
-// 依照類型切換預設分類
 function updateQuickEntryCategory() {
-    const typeInput =
-        document.getElementById("quickType");
 
     const categoryInput =
         document.getElementById("quickCategory");
 
-    if (!typeInput || !categoryInput) return;
+    if (!categoryInput) return;
 
-    const incomeCategories = [
-        "薪資",
-        "獎金",
-        "其他"
-    ];
+    let categories = [];
 
-    const expenseCategories = [
-        "餐飲",
-        "交通",
-        "購物",
-        "娛樂",
-        "醫療",
-        "其他"
-    ];
+    if (typeof getCategories === "function") {
+        categories = getCategories();
+    }
 
-    const categories =
-        typeInput.value === "收入"
-            ? incomeCategories
-            : expenseCategories;
+    if (!Array.isArray(categories) || categories.length === 0) {
+        categories = [
+            "餐飲",
+            "交通",
+            "購物",
+            "娛樂",
+            "醫療",
+            "薪資",
+            "獎金",
+            "其他"
+        ];
+    }
 
     categoryInput.innerHTML = "";
 
     categories.forEach(function (category) {
+
         const option =
             document.createElement("option");
 
@@ -108,7 +105,9 @@ function updateQuickEntryCategory() {
         option.textContent = category;
 
         categoryInput.appendChild(option);
+
     });
+
 }
 
 // 清空快速記帳欄位
