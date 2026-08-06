@@ -1,21 +1,14 @@
-// ===============================
-// SmartBook App
-// ===============================
+// =====================================
+// SmartBook Core Module
+// =====================================
 
-const STORAGE_KEY = "transactions";
+console.log("SmartBook Core Loaded");
+
 let editIndex = -1;
 
-// 讀取資料
-function getTransactions() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-}
-
-// 儲存資料
-function saveTransactions(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
+// ===============================
 // Dashboard
+// ===============================
 function updateDashboard() {
 
     const incomeCard = document.getElementById("incomeTotal");
