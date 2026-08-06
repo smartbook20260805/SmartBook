@@ -176,6 +176,9 @@ function addCategory() {
     saveCategories(categories);
     renderCategoryList();
 
+    updateTransactionCategory();
+    updateFilterCategory();
+
     input.value = "";
     input.focus();
 
@@ -232,6 +235,9 @@ function editCategory(index) {
     saveCategories(categories);
     renderCategoryList();
 
+    updateTransactionCategory();
+    updateFilterCategory();
+
     showCategoryMessage(
         `已將「${oldName}」修改為「${trimmedName}」`
     );
@@ -258,6 +264,9 @@ function deleteCategory(index) {
     saveCategories(categories);
     renderCategoryList();
 
+    updateTransactionCategory();
+    updateFilterCategory();
+
     showCategoryMessage(
         `已刪除分類「${categoryName}」`
     );
@@ -269,6 +278,9 @@ document.addEventListener(
     function () {
 
         renderCategoryList();
+
+        updateTransactionCategory();
+        updateFilterCategory();
 
         const addButton =
             document.getElementById("addCategoryBtn");
@@ -327,3 +339,59 @@ document.addEventListener(
         }
     }
 );
+// ===============================
+// 更新交易頁分類
+// ===============================
+function updateTransactionCategory() {
+
+    const categorySelect =
+        document.getElementById("category");
+
+    if (!categorySelect) return;
+
+    const categories = getCategories();
+
+    categorySelect.innerHTML = "";
+
+    categories.forEach(function (category) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        categorySelect.appendChild(option);
+
+    });
+
+}
+
+// ===============================
+// 更新搜尋分類
+// ===============================
+function updateFilterCategory() {
+
+    const filterSelect =
+        document.getElementById("filterCategory");
+
+    if (!filterSelect) return;
+
+    const categories = getCategories();
+
+    filterSelect.innerHTML =
+        `<option value="">全部</option>`;
+
+    categories.forEach(function (category) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        filterSelect.appendChild(option);
+
+    });
+
+}
