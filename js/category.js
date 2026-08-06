@@ -5,6 +5,7 @@
 console.log("Category Module Loaded");
 
 const CATEGORY_STORAGE_KEY = "smartbookCategories";
+const CATEGORY_TRANSACTION_STORAGE_KEY = "transactions";
 
 const DEFAULT_CATEGORIES = [
     "餐飲",
@@ -17,7 +18,9 @@ const DEFAULT_CATEGORIES = [
     "其他"
 ];
 
+// ===============================
 // 讀取分類
+// ===============================
 function getCategories() {
     try {
         const savedData =
@@ -46,7 +49,9 @@ function getCategories() {
     }
 }
 
+// ===============================
 // 儲存分類
+// ===============================
 function saveCategories(categories) {
     localStorage.setItem(
         CATEGORY_STORAGE_KEY,
@@ -54,8 +59,13 @@ function saveCategories(categories) {
     );
 }
 
+// ===============================
 // 顯示操作訊息
-function showCategoryMessage(message, type = "success") {
+// ===============================
+function showCategoryMessage(
+    message,
+    type = "success"
+) {
     const messageArea =
         document.getElementById("categoryMessage");
 
@@ -79,7 +89,9 @@ function showCategoryMessage(message, type = "success") {
         }, 2500);
 }
 
-// 顯示分類清單
+// ===============================
+// 顯示分類管理清單
+// ===============================
 function renderCategoryList() {
     const listArea =
         document.getElementById("categoryList");
@@ -136,7 +148,164 @@ function renderCategoryList() {
         .join("");
 }
 
+// ===============================
+// 更新交易中的舊分類
+// ===============================
+function updateTransactionsCategory(
+    oldCategory,
+    newCategory
+) {
+    try {
+        const savedData =
+            localStorage.getItem(
+                CATEGORY_TRANSACTION_STORAGE_KEY
+            );
+
+        const transactions =
+            savedData
+                ? JSON.parse(savedData)
+                : [];
+
+        if (!Array.isArray(transactions)) {
+            return;
+        }
+
+        let changed = false;
+
+        transactions.forEach(function (transaction) {
+            if (transaction.category === oldCategory) {
+                transaction.category = newCategory;
+                changed = true;
+            }
+        });
+
+        if (changed) {
+            localStorage.setItem(
+                CATEGORY_TRANSACTION_STORAGE_KEY,
+                JSON.stringify(transactions)
+            );
+        }
+
+    } catch (error) {
+        console.error(
+            "更新交易分類失敗：",
+            error
+        );
+    }
+}
+
+// ===============================
+// 更新交易頁分類下拉選單
+// ===============================
+function updateTransactionCategory() {
+    const categorySelect =
+        document.getElementById("category");
+
+    if (!categorySelect) return;
+
+    const previousValue =
+        categorySelect.value;
+
+    const categories =
+        getCategories();
+
+    categorySelect.innerHTML = "";
+
+    categories.forEach(function (category) {
+        const option =
+            document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        categorySelect.appendChild(option);
+    });
+
+    if (categories.includes(previousValue)) {
+        categorySelect.value = previousValue;
+    }
+}
+
+// ===============================
+// 更新搜尋分類下拉選單
+// ===============================
+function updateFilterCategory() {
+    const filterSelect =
+        document.getElementById("filterCategory");
+
+    if (!filterSelect) return;
+
+    const previousValue =
+        filterSelect.value;
+
+    const categories =
+        getCategories();
+
+    filterSelect.innerHTML =
+        `<option value="">全部</option>`;
+
+    categories.forEach(function (category) {
+        const option =
+            document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        filterSelect.appendChild(option);
+    });
+
+    if (
+        previousValue === "" ||
+        categories.includes(previousValue)
+    ) {
+        filterSelect.value = previousValue;
+    }
+}
+
+// ===============================
+// 更新首頁快速記帳分類
+// ===============================
+function updateQuickEntryCategoryFromManager() {
+    const categorySelect =
+        document.getElementById("quickCategory");
+
+    if (!categorySelect) return;
+
+    const previousValue =
+        categorySelect.value;
+
+    const categories =
+        getCategories();
+
+    categorySelect.innerHTML = "";
+
+    categories.forEach(function (category) {
+        const option =
+            document.createElement("option");
+
+        option.value = category;
+        option.textContent = category;
+
+        categorySelect.appendChild(option);
+    });
+
+    if (categories.includes(previousValue)) {
+        categorySelect.value = previousValue;
+    }
+}
+
+// ===============================
+// 更新所有分類下拉選單
+// ===============================
+function refreshCategorySelects() {
+    updateTransactionCategory();
+    updateFilterCategory();
+    updateQuickEntryCategoryFromManager();
+}
+
+// ===============================
 // 新增分類
+// ===============================
 function addCategory() {
     const input =
         document.getElementById("newCategoryInput");
@@ -151,11 +320,13 @@ function addCategory() {
             "請輸入分類名稱！",
             "error"
         );
+
         input.focus();
         return;
     }
 
-    const categories = getCategories();
+    const categories =
+        getCategories();
 
     const isDuplicate =
         categories.some(function (category) {
@@ -167,6 +338,7 @@ function addCategory() {
             "這個分類已經存在！",
             "error"
         );
+
         input.focus();
         return;
     }
@@ -175,9 +347,7 @@ function addCategory() {
 
     saveCategories(categories);
     renderCategoryList();
-
-    updateTransactionCategory();
-    updateFilterCategory();
+    refreshCategorySelects();
 
     input.value = "";
     input.focus();
@@ -187,11 +357,15 @@ function addCategory() {
     );
 }
 
+// ===============================
 // 修改分類
+// ===============================
 function editCategory(index) {
-    const categories = getCategories();
+    const categories =
+        getCategories();
 
-    const oldName = categories[index];
+    const oldName =
+        categories[index];
 
     if (oldName === undefined) return;
 
@@ -215,7 +389,10 @@ function editCategory(index) {
     }
 
     const isDuplicate =
-        categories.some(function (category, categoryIndex) {
+        categories.some(function (
+            category,
+            categoryIndex
+        ) {
             return (
                 categoryIndex !== index &&
                 category === trimmedName
@@ -233,54 +410,76 @@ function editCategory(index) {
     categories[index] = trimmedName;
 
     saveCategories(categories);
-    renderCategoryList();
 
-    updateTransactionCategory();
-    updateFilterCategory();
+    updateTransactionsCategory(
+        oldName,
+        trimmedName
+    );
+
+    renderCategoryList();
+    refreshCategorySelects();
 
     showCategoryMessage(
         `已將「${oldName}」修改為「${trimmedName}」`
     );
 }
 
+// ===============================
 // 刪除分類
+// ===============================
 function deleteCategory(index) {
-    const categories = getCategories();
+    const categories =
+        getCategories();
 
-    const categoryName =
+    const deletedCategory =
         categories[index];
 
-    if (categoryName === undefined) return;
+    if (deletedCategory === undefined) return;
+
+    if (deletedCategory === "其他") {
+        showCategoryMessage(
+            "「其他」是保留分類，不能刪除！",
+            "error"
+        );
+        return;
+    }
 
     const confirmed =
         window.confirm(
-            `確定要刪除分類「${categoryName}」嗎？`
+            `確定要刪除分類「${deletedCategory}」嗎？\n\n舊交易會自動改成「其他」。`
         );
 
     if (!confirmed) return;
 
     categories.splice(index, 1);
 
-    saveCategories(categories);
-    renderCategoryList();
+    if (!categories.includes("其他")) {
+        categories.push("其他");
+    }
 
-    updateTransactionCategory();
-    updateFilterCategory();
+    saveCategories(categories);
+
+    updateTransactionsCategory(
+        deletedCategory,
+        "其他"
+    );
+
+    renderCategoryList();
+    refreshCategorySelects();
 
     showCategoryMessage(
-        `已刪除分類「${categoryName}」`
+        `已刪除分類「${deletedCategory}」，舊交易已改為「其他」`
     );
 }
 
+// ===============================
 // 頁面載入
+// ===============================
 document.addEventListener(
     "DOMContentLoaded",
     function () {
-
         renderCategoryList();
-
-        updateTransactionCategory();
-        updateFilterCategory();
+        refreshCategorySelects();
 
         const addButton =
             document.getElementById("addCategoryBtn");
@@ -327,6 +526,10 @@ document.addEventListener(
                     const index =
                         Number(button.dataset.index);
 
+                    if (!Number.isInteger(index)) {
+                        return;
+                    }
+
                     if (action === "edit") {
                         editCategory(index);
                     }
@@ -339,59 +542,9 @@ document.addEventListener(
         }
     }
 );
-// ===============================
-// 更新交易頁分類
-// ===============================
-function updateTransactionCategory() {
 
-    const categorySelect =
-        document.getElementById("category");
-
-    if (!categorySelect) return;
-
-    const categories = getCategories();
-
-    categorySelect.innerHTML = "";
-
-    categories.forEach(function (category) {
-
-        const option =
-            document.createElement("option");
-
-        option.value = category;
-        option.textContent = category;
-
-        categorySelect.appendChild(option);
-
-    });
-
-}
-
-// ===============================
-// 更新搜尋分類
-// ===============================
-function updateFilterCategory() {
-
-    const filterSelect =
-        document.getElementById("filterCategory");
-
-    if (!filterSelect) return;
-
-    const categories = getCategories();
-
-    filterSelect.innerHTML =
-        `<option value="">全部</option>`;
-
-    categories.forEach(function (category) {
-
-        const option =
-            document.createElement("option");
-
-        option.value = category;
-        option.textContent = category;
-
-        filterSelect.appendChild(option);
-
-    });
-
-}
+// 返回頁面時更新分類下拉選單
+window.addEventListener(
+    "pageshow",
+    refreshCategorySelects
+);
