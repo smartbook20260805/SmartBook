@@ -55,6 +55,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
+let cloudSyncReady = false;
 
 // =====================================
 // Google Login
@@ -118,9 +119,12 @@ onAuthStateChanged(
 
     auth,
 
-    function(user){
+    async function(user) {
 
         currentUser = user;
+
+        // 每次登入狀態改變，先暫停自動上傳
+        cloudSyncReady = false;
 
         window.dispatchEvent(
 
@@ -129,18 +133,74 @@ onAuthStateChanged(
                 "smartbook-auth-changed",
 
                 {
-
-                    detail:{
-
-                        user:user
-
+                    detail: {
+                        user: user
                     }
-
                 }
 
             )
 
         );
+
+
+        // =====================================
+        // 已登入
+        // =====================================
+
+        if (user) {
+
+            console.log(
+                "Firebase 使用者已登入：",
+                user.email
+            );
+
+            try {
+
+                // 先下載雲端資料
+                const downloaded =
+                    await downloadCloudData();
+
+                if (downloaded) {
+
+                    console.log(
+                        "登入後自動下載完成"
+                    );
+
+                } else {
+
+                    console.log(
+                        "雲端沒有資料，保留目前本機資料"
+                    );
+
+                }
+
+                // 下載流程結束後，才允許自動上傳
+                cloudSyncReady = true;
+
+                console.log(
+                    "SmartBook 雲端同步已就緒"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "登入後自動下載失敗：",
+                    error
+                );
+
+                cloudSyncReady = false;
+
+            }
+
+        } else {
+
+            console.log(
+                "Firebase 尚未登入"
+            );
+
+            cloudSyncReady = false;
+
+        }
 
     }
 
@@ -150,95 +210,105 @@ onAuthStateChanged(
 // Upload SmartBook Data
 // =====================================
 
-async function uploadLocalDataToCloud(){
+async function uploadLocalDataToCloud() {
 
-    if(!currentUser){
+    if (!currentUser) {
 
-        return;
+        console.log(
+            "Cloud Save：尚未登入"
+        );
+
+        return false;
 
     }
 
-    try{
+    // 防止新裝置尚未下載完成就覆蓋雲端
+    if (!cloudSyncReady) {
+
+        console.log(
+            "Cloud Save 暫停：雲端初始化尚未完成"
+        );
+
+        return false;
+
+    }
+
+    try {
+
+        const transactions =
+            JSON.parse(
+                localStorage.getItem(
+                    "transactions"
+                ) || "[]"
+            );
+
+        const monthlyBudget =
+            Number(
+                localStorage.getItem(
+                    "monthlyBudget"
+                ) || 0
+            );
+
+        const categories =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategories"
+                ) || "[]"
+            );
+
 
         const data = {
 
-            transactions: JSON.parse(
+            transactions,
 
-                localStorage.getItem(
+            monthlyBudget,
 
-                    "transactions"
+            categories,
 
-                ) || "[]"
-
-            ),
-
-            monthlyBudget:Number(
-
-                localStorage.getItem(
-
-                    "monthlyBudget"
-
-                ) || 0
-
-            ),
-
-            categories:JSON.parse(
-
-                localStorage.getItem(
-
-                    "smartbookCategories"
-
-                ) || "[]"
-
-            ),
-
-            updatedAt:serverTimestamp()
+            updatedAt:
+                serverTimestamp()
 
         };
+
 
         await setDoc(
 
             doc(
-
                 db,
-
                 "users",
-
                 currentUser.uid,
-
                 "smartbook",
-
                 "data"
-
             ),
 
             data,
 
             {
-
-                merge:true
-
+                merge: true
             }
 
         );
 
+
         console.log(
-
             "Cloud Save Success"
-
         );
 
-    }
+        console.log(
+            "上傳交易筆數：",
+            transactions.length
+        );
 
-    catch(error){
+        return true;
+
+    } catch (error) {
 
         console.error(
-
-            "Cloud Save Failed",
-
+            "Cloud Save Failed：",
             error
-
         );
+
+        return false;
 
     }
 
@@ -248,115 +318,131 @@ async function uploadLocalDataToCloud(){
 // Download SmartBook Data
 // =====================================
 
-async function downloadCloudData(){
+async function downloadCloudData() {
 
-    if(!currentUser){
+    if (!currentUser) {
 
-        return;
-
-    }
-
-    try{
-
-        const snap = await getDoc(
-
-            doc(
-
-                db,
-
-                "users",
-
-                currentUser.uid,
-
-                "smartbook",
-
-                "data"
-
-            )
-
+        console.log(
+            "Cloud Download：目前沒有登入使用者"
         );
 
-        if(!snap.exists()){
+        return false;
+    }
 
-            return;
+    try {
 
+        console.log(
+            "開始下載雲端資料：",
+            currentUser.email
+        );
+
+        const userDocRef = doc(
+            db,
+            "users",
+            currentUser.uid,
+            "smartbook",
+            "data"
+        );
+
+        const snap =
+            await getDoc(userDocRef);
+
+        if (!snap.exists()) {
+
+            console.log(
+                "Firestore 尚無 SmartBook 雲端資料"
+            );
+
+            return false;
         }
 
         const data = snap.data();
 
-        if(data.transactions){
 
-            localStorage.setItem(
+        // ===============================
+        // 交易
+        // ===============================
 
-                "transactions",
+        const transactions =
+            Array.isArray(data.transactions)
+                ? data.transactions
+                : [];
 
-                JSON.stringify(
-
-                    data.transactions
-
-                )
-
-            );
-
-        }
-
-        if(data.categories){
-
-            localStorage.setItem(
-
-                "smartbookCategories",
-
-                JSON.stringify(
-
-                    data.categories
-
-                )
-
-            );
-
-        }
-
-        if(data.monthlyBudget!==undefined){
-
-            localStorage.setItem(
-
-                "monthlyBudget",
-
-                String(
-
-                    data.monthlyBudget
-
-                )
-
-            );
-
-        }
-
-        console.log(
-
-            "Cloud Download Success"
-
+        localStorage.setItem(
+            "transactions",
+            JSON.stringify(transactions)
         );
 
+
+        // ===============================
+        // 分類
+        // ===============================
+
+        const categories =
+            Array.isArray(data.categories)
+                ? data.categories
+                : [];
+
+        localStorage.setItem(
+            "smartbookCategories",
+            JSON.stringify(categories)
+        );
+
+
+        // ===============================
+        // 預算
+        // ===============================
+
+        const monthlyBudget =
+            Number(data.monthlyBudget) || 0;
+
+        localStorage.setItem(
+            "monthlyBudget",
+            String(monthlyBudget)
+        );
+
+
+        console.log(
+            "Cloud Download Success"
+        );
+
+        console.log(
+            "雲端交易筆數：",
+            transactions.length
+        );
+
+        console.log(
+            "雲端預算：",
+            monthlyBudget
+        );
+
+
+        // 通知所有頁面重新讀 localStorage
         window.dispatchEvent(
 
-            new Event(
-
-                "smartbook-cloud-updated"
-
+            new CustomEvent(
+                "smartbook-cloud-updated",
+                {
+                    detail: {
+                        transactions,
+                        categories,
+                        monthlyBudget
+                    }
+                }
             )
 
         );
 
-    }
+        return true;
 
-    catch(error){
+    } catch (error) {
 
         console.error(
-
+            "Cloud Download Failed：",
             error
-
         );
+
+        return false;
 
     }
 
@@ -366,26 +452,24 @@ async function downloadCloudData(){
 // Export
 // =====================================
 
-window.smartbookFirebase={
+window.smartbookFirebase = {
 
     app,
-
     db,
-
     auth,
 
     signInWithGoogle,
-
     signOutGoogle,
 
     uploadLocalDataToCloud,
-
     downloadCloudData,
 
-    getCurrentUser(){
-
+    getCurrentUser() {
         return currentUser;
+    },
 
+    isCloudSyncReady() {
+        return cloudSyncReady;
     }
 
 };
