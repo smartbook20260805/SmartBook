@@ -4,84 +4,159 @@
 
 console.log("Quick Entry Module Loaded");
 
-const QUICK_ENTRY_STORAGE_KEY = "transactions";
 
-// 取得交易資料
+// =====================================
+// 取得快速記帳交易資料
+// 統一使用 storage.js
+// =====================================
+
 function getQuickEntryTransactions() {
-    try {
-        const savedData =
-            localStorage.getItem(QUICK_ENTRY_STORAGE_KEY);
 
-        return savedData
-            ? JSON.parse(savedData)
-            : [];
+    if (typeof getTransactions === "function") {
 
-    } catch (error) {
-        console.error("讀取交易資料失敗：", error);
-        return [];
+        return getTransactions();
+
     }
-}
 
-// 儲存交易資料
-function saveQuickEntryTransactions(transactions) {
-    localStorage.setItem(
-        QUICK_ENTRY_STORAGE_KEY,
-        JSON.stringify(transactions)
+    console.warn(
+        "找不到 getTransactions()，回傳空陣列"
     );
+
+    return [];
+
 }
 
+
+// =====================================
+// 儲存快速記帳交易資料
+// 統一使用 storage.js
+// =====================================
+
+function saveQuickEntryTransactions(transactions) {
+
+    if (typeof saveTransactions === "function") {
+
+        saveTransactions(transactions);
+
+        return;
+
+    }
+
+    console.error(
+        "找不到 saveTransactions()，快速記帳無法儲存"
+    );
+
+}
+
+
+// =====================================
 // 取得今天日期 YYYY-MM-DD
+// =====================================
+
 function getQuickEntryToday() {
+
     const today = new Date();
 
-    const year = today.getFullYear();
+    const year =
+        today.getFullYear();
+
     const month =
-        String(today.getMonth() + 1).padStart(2, "0");
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
+
     const day =
-        String(today.getDate()).padStart(2, "0");
+        String(
+            today.getDate()
+        ).padStart(2, "0");
 
     return `${year}-${month}-${day}`;
+
 }
 
+
+// =====================================
 // 顯示操作訊息
-function showQuickEntryMessage(message, type) {
+// =====================================
+
+function showQuickEntryMessage(
+    message,
+    type
+) {
+
     const messageArea =
-        document.getElementById("quickEntryMessage");
+        document.getElementById(
+            "quickEntryMessage"
+        );
 
     if (!messageArea) return;
+
 
     messageArea.className =
         type === "success"
             ? "alert alert-success mt-3"
             : "alert alert-danger mt-3";
 
-    messageArea.textContent = message;
-    messageArea.style.display = "block";
+
+    messageArea.textContent =
+        message;
+
+    messageArea.style.display =
+        "block";
+
 
     window.clearTimeout(
         showQuickEntryMessage.timeoutId
     );
 
+
     showQuickEntryMessage.timeoutId =
-        window.setTimeout(function () {
-            messageArea.style.display = "none";
-        }, 2500);
+        window.setTimeout(
+            function () {
+
+                messageArea.style.display =
+                    "none";
+
+            },
+            2500
+        );
+
 }
+
+
+// =====================================
+// 更新快速記帳分類
+// =====================================
 
 function updateQuickEntryCategory() {
 
     const categoryInput =
-        document.getElementById("quickCategory");
+        document.getElementById(
+            "quickCategory"
+        );
 
     if (!categoryInput) return;
 
+
     let categories = [];
 
-    if (typeof getCategories === "function") {
-        categories = getCategories();
+
+    if (
+        typeof getCategories ===
+        "function"
+    ) {
+
+        categories =
+            getCategories();
+
     }
 
-    if (!Array.isArray(categories) || categories.length === 0) {
+
+    if (
+        !Array.isArray(categories) ||
+        categories.length === 0
+    ) {
+
         categories = [
             "餐飲",
             "交通",
@@ -92,106 +167,205 @@ function updateQuickEntryCategory() {
             "獎金",
             "其他"
         ];
+
     }
+
 
     categoryInput.innerHTML = "";
 
-    categories.forEach(function (category) {
 
-        const option =
-            document.createElement("option");
+    categories.forEach(
+        function (category) {
 
-        option.value = category;
-        option.textContent = category;
+            const option =
+                document.createElement(
+                    "option"
+                );
 
-        categoryInput.appendChild(option);
+            option.value =
+                category;
 
-    });
+            option.textContent =
+                category;
+
+            categoryInput.appendChild(
+                option
+            );
+
+        }
+    );
 
 }
 
+
+// =====================================
 // 清空快速記帳欄位
+// =====================================
+
 function resetQuickEntryForm() {
+
     const dateInput =
-        document.getElementById("quickDate");
+        document.getElementById(
+            "quickDate"
+        );
 
     const typeInput =
-        document.getElementById("quickType");
+        document.getElementById(
+            "quickType"
+        );
 
     const itemInput =
-        document.getElementById("quickItem");
+        document.getElementById(
+            "quickItem"
+        );
 
     const amountInput =
-        document.getElementById("quickAmount");
+        document.getElementById(
+            "quickAmount"
+        );
+
 
     if (dateInput) {
-        dateInput.value = getQuickEntryToday();
+
+        dateInput.value =
+            getQuickEntryToday();
+
     }
 
+
     if (typeInput) {
-        typeInput.value = "支出";
+
+        typeInput.value =
+            "支出";
+
     }
+
 
     updateQuickEntryCategory();
 
+
     if (itemInput) {
+
         itemInput.value = "";
+
     }
+
 
     if (amountInput) {
+
         amountInput.value = "";
+
     }
+
 
     if (itemInput) {
+
         itemInput.focus();
+
     }
+
 }
 
-// 更新首頁所有資料
+
+// =====================================
+// 更新首頁資料
+// =====================================
+
 function refreshQuickEntryDashboard() {
 
-    if (typeof updateDashboard === "function") {
+    if (
+        typeof updateDashboard ===
+        "function"
+    ) {
+
         updateDashboard();
+
     }
 
-    if (typeof loadRecentTransactions === "function") {
+
+    if (
+        typeof loadRecentTransactions ===
+        "function"
+    ) {
+
         loadRecentTransactions();
+
     }
 
-    if (typeof loadAdvanceSummary === "function") {
+
+    if (
+        typeof loadAdvanceSummary ===
+        "function"
+    ) {
+
         loadAdvanceSummary();
+
     }
 
-    if (typeof updateBudgetDashboard === "function") {
+
+    if (
+        typeof updateBudgetDashboard ===
+        "function"
+    ) {
+
         updateBudgetDashboard();
+
     }
 
-    if (typeof refreshDashboardAnalytics === "function") {
+
+    if (
+        typeof refreshDashboardAnalytics ===
+        "function"
+    ) {
+
         refreshDashboardAnalytics();
+
     }
 
-    if (typeof refreshCalendar === "function") {
+
+    if (
+        typeof refreshCalendar ===
+        "function"
+    ) {
+
         refreshCalendar();
+
     }
 
 }
 
+
+// =====================================
 // 新增快速交易
+// =====================================
+
 function addQuickEntryTransaction() {
+
     const dateInput =
-        document.getElementById("quickDate");
+        document.getElementById(
+            "quickDate"
+        );
 
     const typeInput =
-        document.getElementById("quickType");
+        document.getElementById(
+            "quickType"
+        );
 
     const categoryInput =
-        document.getElementById("quickCategory");
+        document.getElementById(
+            "quickCategory"
+        );
 
     const itemInput =
-        document.getElementById("quickItem");
+        document.getElementById(
+            "quickItem"
+        );
 
     const amountInput =
-        document.getElementById("quickAmount");
+        document.getElementById(
+            "quickAmount"
+        );
+
 
     if (
         !dateInput ||
@@ -200,126 +374,252 @@ function addQuickEntryTransaction() {
         !itemInput ||
         !amountInput
     ) {
-        console.error("快速記帳欄位不完整");
+
+        console.error(
+            "快速記帳欄位不完整"
+        );
+
         return;
+
     }
 
-    const date = dateInput.value;
-    const type = typeInput.value;
-    const category = categoryInput.value;
-    const item = itemInput.value.trim();
-    const amount = Number(amountInput.value);
 
+    const date =
+        dateInput.value;
+
+    const type =
+        typeInput.value;
+
+    const category =
+        categoryInput.value;
+
+    const item =
+        itemInput.value.trim();
+
+    const amount =
+        Number(
+            amountInput.value
+        );
+
+
+    // 日期檢查
     if (!date) {
+
         showQuickEntryMessage(
             "請選擇交易日期！",
             "error"
         );
+
         return;
+
     }
 
+
+    // 項目檢查
     if (!item) {
+
         showQuickEntryMessage(
             "請輸入交易項目！",
             "error"
         );
+
         itemInput.focus();
+
         return;
+
     }
 
-    if (!Number.isFinite(amount) || amount <= 0) {
+
+    // 金額檢查
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
         showQuickEntryMessage(
             "請輸入大於 0 的金額！",
             "error"
         );
+
         amountInput.focus();
+
         return;
+
     }
+
 
     const transactions =
         getQuickEntryTransactions();
 
+
     const newTransaction = {
-        date: date,
-        type: type,
-        category: category,
+
+        date,
+        type,
+        category,
+
         advancePerson: "",
+
         advanceStatus: "",
+
         recoveredDate: "",
-        item: item,
-        amount: amount,
+
+        item,
+
+        amount,
+
         note: ""
+
     };
 
-    transactions.push(newTransaction);
 
-    saveQuickEntryTransactions(transactions);
+    transactions.push(
+        newTransaction
+    );
+
+
+    // 統一走 storage.js
+    // storage.js 再負責 Firebase
+    saveQuickEntryTransactions(
+        transactions
+    );
+
+
+    console.log(
+        "Quick Entry：交易已新增"
+    );
+
 
     refreshQuickEntryDashboard();
+
 
     showQuickEntryMessage(
         `✅ 已新增「${item}」NT$ ${amount.toLocaleString()}`,
         "success"
     );
 
+
     resetQuickEntryForm();
+
 }
 
+
+// =====================================
 // 頁面載入
+// =====================================
+
 document.addEventListener(
+
     "DOMContentLoaded",
+
     function () {
+
         const dateInput =
-            document.getElementById("quickDate");
+            document.getElementById(
+                "quickDate"
+            );
 
         const typeInput =
-            document.getElementById("quickType");
+            document.getElementById(
+                "quickType"
+            );
 
         const itemInput =
-            document.getElementById("quickItem");
+            document.getElementById(
+                "quickItem"
+            );
 
         const amountInput =
-            document.getElementById("quickAmount");
+            document.getElementById(
+                "quickAmount"
+            );
 
         const addButton =
-            document.getElementById("quickAddBtn");
+            document.getElementById(
+                "quickAddBtn"
+            );
 
-        // 只有首頁存在快速記帳表單時才執行
-        if (!addButton) return;
 
-        if (dateInput && !dateInput.value) {
-            dateInput.value = getQuickEntryToday();
+        // 只有首頁有快速記帳表單才執行
+        if (!addButton) {
+
+            return;
+
         }
+
+
+        if (
+            dateInput &&
+            !dateInput.value
+        ) {
+
+            dateInput.value =
+                getQuickEntryToday();
+
+        }
+
 
         updateQuickEntryCategory();
 
+
         if (typeInput) {
+
             typeInput.addEventListener(
+
                 "change",
+
                 updateQuickEntryCategory
+
             );
+
         }
 
+
         addButton.addEventListener(
+
             "click",
+
             addQuickEntryTransaction
+
         );
 
-        // 在項目或金額欄按 Enter 也能新增
-        [itemInput, amountInput].forEach(
+
+        // 項目 / 金額按 Enter 直接新增
+        [
+            itemInput,
+            amountInput
+        ].forEach(
+
             function (input) {
+
                 if (!input) return;
 
+
                 input.addEventListener(
+
                     "keydown",
+
                     function (event) {
-                        if (event.key === "Enter") {
+
+                        if (
+                            event.key ===
+                            "Enter"
+                        ) {
+
                             event.preventDefault();
+
                             addQuickEntryTransaction();
+
                         }
+
                     }
+
                 );
+
             }
+
         );
+
     }
+
 );

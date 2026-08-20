@@ -1,8 +1,11 @@
 // =====================================
 // SmartBook Firebase Module
+// V5.2 - Cloud + Realtime Sync
 // =====================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 
 import {
     getAuth,
@@ -17,10 +20,13 @@ import {
     doc,
     getDoc,
     setDoc,
+    onSnapshot,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
+
 console.log("Firebase Module Loading");
+
 
 // =====================================
 // Firebase Config
@@ -28,71 +34,84 @@ console.log("Firebase Module Loading");
 
 const firebaseConfig = {
 
-    apiKey: "AIzaSyD6ne3Onp48yVm9k8FZNcMW3uw-2rSTHQw",
+    apiKey:
+        "AIzaSyD6ne3Onp48yVm9k8FZNcMW3uw-2rSTHQw",
 
-    authDomain: "smartbook-7594c.firebaseapp.com",
+    authDomain:
+        "smartbook-7594c.firebaseapp.com",
 
-    projectId: "smartbook-7594c",
+    projectId:
+        "smartbook-7594c",
 
-    storageBucket: "smartbook-7594c.firebasestorage.app",
+    storageBucket:
+        "smartbook-7594c.firebasestorage.app",
 
-    messagingSenderId: "470454624023",
+    messagingSenderId:
+        "470454624023",
 
-    appId: "1:470454624023:web:7afea9a87dccc99a03e152",
+    appId:
+        "1:470454624023:web:7afea9a87dccc99a03e152",
 
-    measurementId: "G-1Y3LLQV4E9"
+    measurementId:
+        "G-1Y3LLQV4E9"
 
 };
 
+
+// =====================================
+// Firebase 啟動
 // =====================================
 
-const app = initializeApp(firebaseConfig);
+const app =
+    initializeApp(firebaseConfig);
 
-const db = getFirestore(app);
+const db =
+    getFirestore(app);
 
-const auth = getAuth(app);
+const auth =
+    getAuth(app);
 
-const provider = new GoogleAuthProvider();
+const provider =
+    new GoogleAuthProvider();
+
+
+// =====================================
+// 狀態
+// =====================================
 
 let currentUser = null;
+
 let cloudSyncReady = false;
 
+let stopRealtimeSync = null;
+
+
 // =====================================
-// Google Login
+// Google 登入
 // =====================================
 
 async function signInWithGoogle() {
 
     try {
 
-        const result = await signInWithPopup(
-
-            auth,
-
-            provider
-
-        );
+        const result =
+            await signInWithPopup(
+                auth,
+                provider
+            );
 
         console.log(
-
             "Google Login Success",
-
             result.user.email
-
         );
 
         return result.user;
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         console.error(
-
             "Google Login Failed",
-
             error
-
         );
 
         throw error;
@@ -101,113 +120,208 @@ async function signInWithGoogle() {
 
 }
 
+
 // =====================================
-// Google Logout
+// Google 登出
 // =====================================
 
 async function signOutGoogle() {
 
-    await signOut(auth);
+    try {
 
-}
+        await signOut(auth);
 
-// =====================================
-// Auth Listener
-// =====================================
-
-onAuthStateChanged(
-
-    auth,
-
-    async function(user) {
-
-        currentUser = user;
-
-        // 每次登入狀態改變，先暫停自動上傳
-        cloudSyncReady = false;
-
-        window.dispatchEvent(
-
-            new CustomEvent(
-
-                "smartbook-auth-changed",
-
-                {
-                    detail: {
-                        user: user
-                    }
-                }
-
-            )
-
+        console.log(
+            "Google Logout Success"
         );
 
+    } catch (error) {
 
-        // =====================================
-        // 已登入
-        // =====================================
+        console.error(
+            "Google Logout Failed",
+            error
+        );
 
-        if (user) {
-
-            console.log(
-                "Firebase 使用者已登入：",
-                user.email
-            );
-
-            try {
-
-                // 先下載雲端資料
-                const downloaded =
-                    await downloadCloudData();
-
-                if (downloaded) {
-
-                    console.log(
-                        "登入後自動下載完成"
-                    );
-
-                } else {
-
-                    console.log(
-                        "雲端沒有資料，保留目前本機資料"
-                    );
-
-                }
-
-                // 下載流程結束後，才允許自動上傳
-                cloudSyncReady = true;
-
-                console.log(
-                    "SmartBook 雲端同步已就緒"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "登入後自動下載失敗：",
-                    error
-                );
-
-                cloudSyncReady = false;
-
-            }
-
-        } else {
-
-            console.log(
-                "Firebase 尚未登入"
-            );
-
-            cloudSyncReady = false;
-
-        }
+        throw error;
 
     }
 
-);
+}
+
 
 // =====================================
-// Upload SmartBook Data
+// 使用者 Firestore 文件
+//
+// users/{uid}/smartbook/data
+// =====================================
+
+function getUserDataDoc() {
+
+    if (!currentUser) {
+        return null;
+    }
+
+    return doc(
+        db,
+        "users",
+        currentUser.uid,
+        "smartbook",
+        "data"
+    );
+
+}
+
+
+// =====================================
+// 取得本機 SmartBook 資料
+// =====================================
+
+function getLocalSmartBookData() {
+
+    let transactions = [];
+    let categories = [];
+
+    try {
+
+        transactions =
+            JSON.parse(
+                localStorage.getItem(
+                    "transactions"
+                ) || "[]"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取本機交易失敗：",
+            error
+        );
+
+        transactions = [];
+
+    }
+
+
+    try {
+
+        categories =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategories"
+                ) || "[]"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取本機分類失敗：",
+            error
+        );
+
+        categories = [];
+
+    }
+
+
+    const monthlyBudget =
+        Number(
+            localStorage.getItem(
+                "monthlyBudget"
+            )
+        ) || 0;
+
+
+    return {
+
+        transactions:
+            Array.isArray(transactions)
+                ? transactions
+                : [],
+
+        categories:
+            Array.isArray(categories)
+                ? categories
+                : [],
+
+        monthlyBudget
+
+    };
+
+}
+
+
+// =====================================
+// 將雲端資料套用到 localStorage
+// =====================================
+
+function applyCloudData(data) {
+
+    const transactions =
+        Array.isArray(data?.transactions)
+            ? data.transactions
+            : [];
+
+    const categories =
+        Array.isArray(data?.categories)
+            ? data.categories
+            : [];
+
+    const monthlyBudget =
+        Number(data?.monthlyBudget) || 0;
+
+
+    localStorage.setItem(
+        "transactions",
+        JSON.stringify(transactions)
+    );
+
+    localStorage.setItem(
+        "smartbookCategories",
+        JSON.stringify(categories)
+    );
+
+    localStorage.setItem(
+        "monthlyBudget",
+        String(monthlyBudget)
+    );
+
+
+    console.log(
+        "雲端資料已寫入 localStorage"
+    );
+
+    console.log(
+        "雲端交易筆數：",
+        transactions.length
+    );
+
+    console.log(
+        "雲端預算：",
+        monthlyBudget
+    );
+
+
+    // 通知 SmartBook 各模組刷新
+    window.dispatchEvent(
+
+        new CustomEvent(
+            "smartbook-cloud-updated",
+            {
+                detail: {
+                    transactions,
+                    categories,
+                    monthlyBudget
+                }
+            }
+        )
+
+    );
+
+}
+
+
+// =====================================
+// 上傳本機資料至 Firestore
 // =====================================
 
 async function uploadLocalDataToCloud() {
@@ -222,7 +336,9 @@ async function uploadLocalDataToCloud() {
 
     }
 
-    // 防止新裝置尚未下載完成就覆蓋雲端
+
+    // 登入初始化尚未完成時，
+    // 禁止上傳，避免新裝置空資料覆蓋雲端。
     if (!cloudSyncReady) {
 
         console.log(
@@ -233,55 +349,35 @@ async function uploadLocalDataToCloud() {
 
     }
 
+
     try {
 
-        const transactions =
-            JSON.parse(
-                localStorage.getItem(
-                    "transactions"
-                ) || "[]"
-            );
+        const localData =
+            getLocalSmartBookData();
 
-        const monthlyBudget =
-            Number(
-                localStorage.getItem(
-                    "monthlyBudget"
-                ) || 0
-            );
-
-        const categories =
-            JSON.parse(
-                localStorage.getItem(
-                    "smartbookCategories"
-                ) || "[]"
-            );
-
-
-        const data = {
-
-            transactions,
-
-            monthlyBudget,
-
-            categories,
-
-            updatedAt:
-                serverTimestamp()
-
-        };
+        const userDocRef =
+            getUserDataDoc();
 
 
         await setDoc(
 
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "smartbook",
-                "data"
-            ),
+            userDocRef,
 
-            data,
+            {
+
+                transactions:
+                    localData.transactions,
+
+                categories:
+                    localData.categories,
+
+                monthlyBudget:
+                    localData.monthlyBudget,
+
+                updatedAt:
+                    serverTimestamp()
+
+            },
 
             {
                 merge: true
@@ -296,7 +392,7 @@ async function uploadLocalDataToCloud() {
 
         console.log(
             "上傳交易筆數：",
-            transactions.length
+            localData.transactions.length
         );
 
         return true;
@@ -314,8 +410,9 @@ async function uploadLocalDataToCloud() {
 
 }
 
+
 // =====================================
-// Download SmartBook Data
+// 從 Firestore 下載資料
 // =====================================
 
 async function downloadCloudData() {
@@ -327,7 +424,9 @@ async function downloadCloudData() {
         );
 
         return false;
+
     }
+
 
     try {
 
@@ -336,102 +435,36 @@ async function downloadCloudData() {
             currentUser.email
         );
 
-        const userDocRef = doc(
-            db,
-            "users",
-            currentUser.uid,
-            "smartbook",
-            "data"
-        );
 
-        const snap =
+        const userDocRef =
+            getUserDataDoc();
+
+        const snapshot =
             await getDoc(userDocRef);
 
-        if (!snap.exists()) {
+
+        if (!snapshot.exists()) {
 
             console.log(
                 "Firestore 尚無 SmartBook 雲端資料"
             );
 
             return false;
+
         }
 
-        const data = snap.data();
+
+        const data =
+            snapshot.data();
 
 
-        // ===============================
-        // 交易
-        // ===============================
-
-        const transactions =
-            Array.isArray(data.transactions)
-                ? data.transactions
-                : [];
-
-        localStorage.setItem(
-            "transactions",
-            JSON.stringify(transactions)
-        );
-
-
-        // ===============================
-        // 分類
-        // ===============================
-
-        const categories =
-            Array.isArray(data.categories)
-                ? data.categories
-                : [];
-
-        localStorage.setItem(
-            "smartbookCategories",
-            JSON.stringify(categories)
-        );
-
-
-        // ===============================
-        // 預算
-        // ===============================
-
-        const monthlyBudget =
-            Number(data.monthlyBudget) || 0;
-
-        localStorage.setItem(
-            "monthlyBudget",
-            String(monthlyBudget)
-        );
+        applyCloudData(data);
 
 
         console.log(
             "Cloud Download Success"
         );
 
-        console.log(
-            "雲端交易筆數：",
-            transactions.length
-        );
-
-        console.log(
-            "雲端預算：",
-            monthlyBudget
-        );
-
-
-        // 通知所有頁面重新讀 localStorage
-        window.dispatchEvent(
-
-            new CustomEvent(
-                "smartbook-cloud-updated",
-                {
-                    detail: {
-                        transactions,
-                        categories,
-                        monthlyBudget
-                    }
-                }
-            )
-
-        );
 
         return true;
 
@@ -448,8 +481,223 @@ async function downloadCloudData() {
 
 }
 
+
 // =====================================
-// Export
+// Firestore 即時監聽
+// =====================================
+
+function startRealtimeSync() {
+
+    if (!currentUser) {
+
+        console.log(
+            "Realtime Sync：尚未登入"
+        );
+
+        return;
+
+    }
+
+
+    // 避免重複建立監聽器
+    if (stopRealtimeSync) {
+
+        stopRealtimeSync();
+
+        stopRealtimeSync = null;
+
+    }
+
+
+    const userDocRef =
+        getUserDataDoc();
+
+
+    console.log(
+        "Realtime Sync：開始監聽"
+    );
+
+
+    stopRealtimeSync =
+        onSnapshot(
+
+            userDocRef,
+
+            function(snapshot) {
+
+                if (!snapshot.exists()) {
+
+                    console.log(
+                        "Realtime Sync：目前沒有雲端文件"
+                    );
+
+                    return;
+
+                }
+
+
+                const data =
+                    snapshot.data();
+
+
+                console.log(
+                    "Realtime Sync：收到雲端更新"
+                );
+
+
+                applyCloudData(data);
+
+            },
+
+            function(error) {
+
+                console.error(
+                    "Realtime Sync Failed：",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+// =====================================
+// 停止即時同步
+// =====================================
+
+function stopRealtimeListener() {
+
+    if (stopRealtimeSync) {
+
+        stopRealtimeSync();
+
+        stopRealtimeSync = null;
+
+        console.log(
+            "Realtime Sync：已停止"
+        );
+
+    }
+
+}
+
+
+// =====================================
+// Authentication Listener
+// =====================================
+
+onAuthStateChanged(
+
+    auth,
+
+    async function(user) {
+
+        currentUser = user;
+
+        // 登入狀態改變時先禁止上傳
+        cloudSyncReady = false;
+
+
+        // 通知首頁更新登入資訊
+        window.dispatchEvent(
+
+            new CustomEvent(
+                "smartbook-auth-changed",
+                {
+                    detail: {
+                        user
+                    }
+                }
+            )
+
+        );
+
+
+        // =====================================
+        // 已登入
+        // =====================================
+
+        if (user) {
+
+            console.log(
+                "Firebase 使用者已登入：",
+                user.email
+            );
+
+
+            try {
+
+                // 先下載雲端
+                const downloaded =
+                    await downloadCloudData();
+
+
+                // 如果此帳號雲端完全沒有資料，
+                // 才使用目前本機資料建立第一份雲端資料。
+                if (!downloaded) {
+
+                    console.log(
+                        "第一次使用此帳號，準備建立雲端資料"
+                    );
+
+                    cloudSyncReady = true;
+
+                    await uploadLocalDataToCloud();
+
+                } else {
+
+                    cloudSyncReady = true;
+
+                }
+
+
+                console.log(
+                    "SmartBook 雲端同步已就緒"
+                );
+
+
+                // 啟動即時同步
+                startRealtimeSync();
+
+
+            } catch (error) {
+
+                cloudSyncReady = false;
+
+                console.error(
+                    "登入後同步初始化失敗：",
+                    error
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        // =====================================
+        // 未登入 / 登出
+        // =====================================
+
+        console.log(
+            "Firebase 尚未登入"
+        );
+
+        cloudSyncReady = false;
+
+        stopRealtimeListener();
+
+    }
+
+);
+
+
+// =====================================
+// 提供給 SmartBook 傳統 JS 使用
 // =====================================
 
 window.smartbookFirebase = {
@@ -464,18 +712,24 @@ window.smartbookFirebase = {
     uploadLocalDataToCloud,
     downloadCloudData,
 
+    startRealtimeSync,
+    stopRealtimeListener,
+
     getCurrentUser() {
+
         return currentUser;
+
     },
 
     isCloudSyncReady() {
+
         return cloudSyncReady;
+
     }
 
 };
 
+
 console.log(
-
     "Firebase Module Loaded"
-
 );
