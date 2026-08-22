@@ -997,7 +997,7 @@ function exportBackup() {
 
     const backupData = {
         app: "SmartBook",
-        version: "V4.1",
+        version: "V6.5",
         exportedAt: new Date().toISOString(),
         transactions
     };
