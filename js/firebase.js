@@ -566,14 +566,7 @@ function startRealtimeSync() {
                 // 即時同步成功，更新最後同步時間
                 // =====================================
 
-                if (
-                    typeof saveLastCloudSyncTime ===
-                    "function"
-                ) {
-
-                    saveLastCloudSyncTime();
-
-                }
+                
 
             },
 

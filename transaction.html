@@ -54,31 +54,49 @@
         "
     >
 
-        <h2 class="mb-0">
-            💰 收支記帳
-        </h2>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+
+    <h2 class="mb-0">
+        💰 收支記帳
+    </h2>
+
+    <!-- SmartBook 雲端同步狀態 -->
+    <div class="smartbook-sync-wrap">
+
+        <span
+            id="syncStatus"
+            class="smartbook-sync-status"
+        >
+            ☁️ 已同步
+        </span>
+
+        <small id="lastSyncTime">
+            尚未同步
+        </small>
+
+    </div>
+
+</div>
 
 
-        <div class="d-flex gap-2 flex-wrap">
+<div class="d-flex gap-2 flex-wrap">
 
-            <!-- 直接跳到交易紀錄 -->
-            <a
-                href="#transactionRecords"
-                class="btn btn-primary"
-            >
-                📋 查看交易紀錄
-            </a>
+    <!-- 直接跳到交易紀錄 -->
+    <a
+        href="#transactionRecords"
+        class="btn btn-primary"
+    >
+        📋 查看交易紀錄
+    </a>
 
+    <a
+        href="index.html"
+        class="btn btn-secondary"
+    >
+        ← 返回首頁
+    </a>
 
-            <a
-                href="index.html"
-                class="btn btn-secondary"
-            >
-                ← 返回首頁
-            </a>
-
-        </div>
-
+</div>
     </div>
 
 

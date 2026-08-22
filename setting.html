@@ -45,16 +45,39 @@
 
         <header class="topbar">
 
-            <div>
+           <div>
 
-                <h1>⚙️ 系統設定</h1>
+    <div
+        class="d-flex align-items-center gap-3 flex-wrap"
+    >
 
-                <p class="page-description">
-                    SmartBook 系統功能與資料管理
-                </p>
+        <h1 class="mb-0">
+            ⚙️ 系統設定
+        </h1>
 
-            </div>
+        <!-- SmartBook 雲端同步狀態 -->
+        <div class="smartbook-sync-wrap">
 
+            <span
+                id="syncStatus"
+                class="smartbook-sync-status"
+            >
+                ☁️ 已同步
+            </span>
+
+            <small id="lastSyncTime">
+                尚未同步
+            </small>
+
+        </div>
+
+    </div>
+
+    <p class="page-description">
+        SmartBook 系統功能與資料管理
+    </p>
+
+</div>
         </header>
 
         <section class="dashboard">
