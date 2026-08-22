@@ -683,3 +683,23 @@ document.addEventListener(
 
     }
 );
+
+// =====================================
+// Firebase 雲端資料更新成功
+// 記錄最後同步時間
+// =====================================
+
+window.addEventListener(
+    "smartbook-cloud-updated",
+    function () {
+
+        saveLastCloudSyncTime();
+
+        updateSyncStatus("synced");
+
+        console.log(
+            "SmartBook：已更新最後同步時間"
+        );
+
+    }
+);

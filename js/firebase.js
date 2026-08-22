@@ -461,6 +461,20 @@ async function downloadCloudData() {
         applyCloudData(data);
 
 
+        // =====================================
+        // 雲端下載成功，更新最後同步時間
+        // =====================================
+
+        if (
+            typeof saveLastCloudSyncTime ===
+            "function"
+        ) {
+
+            saveLastCloudSyncTime();
+
+        }
+
+
         console.log(
             "Cloud Download Success"
         );
@@ -547,6 +561,20 @@ function startRealtimeSync() {
 
                 applyCloudData(data);
 
+
+                // =====================================
+                // 即時同步成功，更新最後同步時間
+                // =====================================
+
+                if (
+                    typeof saveLastCloudSyncTime ===
+                    "function"
+                ) {
+
+                    saveLastCloudSyncTime();
+
+                }
+
             },
 
             function(error) {
@@ -561,7 +589,6 @@ function startRealtimeSync() {
         );
 
 }
-
 
 // =====================================
 // 停止即時同步
