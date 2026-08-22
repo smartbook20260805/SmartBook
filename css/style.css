@@ -930,3 +930,51 @@ body {
 
 }
 
+/* =====================================
+   SmartBook Sync Status
+   ===================================== */
+
+.smartbook-sync-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 34px;
+    padding: 6px 12px;
+
+    border-radius: 999px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    transition: all 0.25s ease;
+}
+
+
+/* 已同步 */
+
+.smartbook-sync-status.synced {
+    color: #15803d;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+}
+
+
+/* 等待同步 */
+
+.smartbook-sync-status.pending {
+    color: #a16207;
+    background: #fef9c3;
+    border: 1px solid #fde68a;
+}
+
+
+/* 離線 */
+
+.smartbook-sync-status.offline {
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+}

@@ -77,17 +77,49 @@ function updateSyncStatus(status) {
 
     if (!statusElement) return;
 
+
+    statusElement.classList.remove(
+        "synced",
+        "pending",
+        "offline"
+    );
+
+
     if (status === "offline") {
-        statusElement.textContent = "📴 離線";
+
+        statusElement.textContent =
+            "📴 離線";
+
+        statusElement.classList.add(
+            "offline"
+        );
+
         return;
+
     }
+
 
     if (status === "pending") {
-        statusElement.textContent = "⏳ 等待同步";
+
+        statusElement.textContent =
+            "⏳ 等待同步";
+
+        statusElement.classList.add(
+            "pending"
+        );
+
         return;
+
     }
 
-    statusElement.textContent = "☁️ 已同步";
+
+    statusElement.textContent =
+        "☁️ 已同步";
+
+    statusElement.classList.add(
+        "synced"
+    );
+
 }
 
 
@@ -462,7 +494,7 @@ window.addEventListener(
     function () {
 
         updateSyncStatus("pending");
-        
+
         console.log(
             "SmartBook：網路已恢復"
         );
@@ -536,6 +568,40 @@ window.addEventListener(
     }
 
 );
+
+
+// =====================================
+// 初始化同步狀態顯示
+// =====================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        // 沒有網路
+        if (!navigator.onLine) {
+
+            updateSyncStatus("offline");
+
+            return;
+
+        }
+
+        // 有尚未同步的資料
+        if (hasPendingCloudSync()) {
+
+            updateSyncStatus("pending");
+
+            return;
+
+        }
+
+        // 網路正常且沒有待同步資料
+        updateSyncStatus("synced");
+
+    }
+);
+
 
 
 console.log(
