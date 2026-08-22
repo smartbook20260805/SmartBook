@@ -978,3 +978,20 @@ body {
     background: #fee2e2;
     border: 1px solid #fecaca;
 }
+
+/* =====================================
+   SmartBook Last Sync Time
+   ===================================== */
+
+.smartbook-sync-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+#lastSyncTime {
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+}

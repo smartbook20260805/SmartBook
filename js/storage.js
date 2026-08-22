@@ -15,7 +15,10 @@ const STORAGE_KEYS = {
     categories: "smartbookCategories",
 
     pendingCloudSync:
-        "smartbookPendingCloudSync"
+        "smartbookPendingCloudSync",
+
+    lastCloudSync:
+        "smartbookLastCloudSync"
 
 };
 
@@ -55,11 +58,78 @@ function markPendingCloudSync() {
 }
 
 
+// =====================================
+// 最後同步時間
+// =====================================
+
+function saveLastCloudSyncTime() {
+
+    const now =
+        new Date().toISOString();
+
+    localStorage.setItem(
+        STORAGE_KEYS.lastCloudSync,
+        now
+    );
+
+    // 更新畫面上的最後同步時間
+    updateLastSyncTimeDisplay();
+
+}
+
+
+function getLastCloudSyncTime() {
+
+    return localStorage.getItem(
+        STORAGE_KEYS.lastCloudSync
+    );
+
+}
+
+
+function updateLastSyncTimeDisplay() {
+
+    const timeElement =
+        document.getElementById("lastSyncTime");
+
+    if (!timeElement) return;
+
+    const savedTime =
+        getLastCloudSyncTime();
+
+    if (!savedTime) {
+
+        timeElement.textContent =
+            "尚未同步";
+
+        return;
+    }
+
+    const date =
+        new Date(savedTime);
+
+    const timeText =
+        date.toLocaleTimeString(
+            "zh-TW",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    timeElement.textContent =
+        `最後同步 ${timeText}`;
+}
+
+
 function clearPendingCloudSync() {
 
     localStorage.removeItem(
         STORAGE_KEYS.pendingCloudSync
     );
+
+    // 記錄最後一次成功同步時間
+    saveLastCloudSyncTime();
 
     updateSyncStatus("synced");
 
@@ -68,7 +138,6 @@ function clearPendingCloudSync() {
     );
 
 }
-
 
 function updateSyncStatus(status) {
 
@@ -578,6 +647,17 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
 
+        // =====================================
+        // 顯示最後一次成功同步時間
+        // =====================================
+
+        updateLastSyncTimeDisplay();
+
+
+        // =====================================
+        // 初始化同步狀態
+        // =====================================
+
         // 沒有網路
         if (!navigator.onLine) {
 
@@ -586,6 +666,7 @@ document.addEventListener(
             return;
 
         }
+
 
         // 有尚未同步的資料
         if (hasPendingCloudSync()) {
@@ -596,14 +677,9 @@ document.addEventListener(
 
         }
 
+
         // 網路正常且沒有待同步資料
         updateSyncStatus("synced");
 
     }
-);
-
-
-
-console.log(
-    "SmartBook Offline Storage Ready"
 );
