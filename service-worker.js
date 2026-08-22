@@ -1,57 +1,160 @@
-const CACHE_NAME = "smartbook-v2";
+// =====================================
+// SmartBook Service Worker
+// V6.0 PWA
+// =====================================
 
-const FILES_TO_CACHE = [
+const CACHE_NAME = "smartbook-v6-cache-v1";
+
+const APP_FILES = [
     "./",
     "./index.html",
     "./transaction.html",
+    "./setting.html",
     "./report.html",
+    "./manifest.json",
+
     "./css/style.css",
+    "./css/mobile.css",
+
     "./js/app.js",
-    "./manifest.json"
+    "./js/storage.js",
+    "./js/firebase.js",
+    "./js/budget.js",
+    "./js/category.js",
+    "./js/quick-entry.js",
+    "./js/dashboard.js",
+    "./js/trend-chart.js",
+    "./js/calendar.js",
+    "./js/utils.js",
+
+    "./icons/smartbook-192.png",
+    "./icons/smartbook-512.png"
 ];
 
+
+// =====================================
 // 安裝
-self.addEventListener("install", event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(FILES_TO_CACHE))
-    );
+// =====================================
 
-    self.skipWaiting();
-});
+self.addEventListener(
+    "install",
+    function (event) {
 
-// 刪除舊快取
-self.addEventListener("activate", event => {
-    event.waitUntil(
-        caches.keys().then(cacheNames =>
-            Promise.all(
-                cacheNames
-                    .filter(name => name !== CACHE_NAME)
-                    .map(name => caches.delete(name))
-            )
-        )
-    );
+        event.waitUntil(
 
-    self.clients.claim();
-});
+            caches
+                .open(CACHE_NAME)
+                .then(function (cache) {
 
-// HTML、CSS、JS 優先抓最新版；離線時才使用快取
-self.addEventListener("fetch", event => {
+                    console.log(
+                        "SmartBook Service Worker：建立快取"
+                    );
 
-    if (event.request.method !== "GET") return;
+                    return cache.addAll(APP_FILES);
 
-    event.respondWith(
-        fetch(event.request)
-            .then(response => {
+                })
 
-                const responseCopy = response.clone();
+        );
 
-                caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, responseCopy);
-                });
+        self.skipWaiting();
 
-                return response;
-            })
-            .catch(() => caches.match(event.request))
-    );
-});
+    }
+);
+
+
+// =====================================
+// 啟用
+// =====================================
+
+self.addEventListener(
+    "activate",
+    function (event) {
+
+        event.waitUntil(
+
+            caches
+                .keys()
+                .then(function (cacheNames) {
+
+                    return Promise.all(
+
+                        cacheNames.map(
+                            function (cacheName) {
+
+                                if (
+                                    cacheName !==
+                                    CACHE_NAME
+                                ) {
+
+                                    return caches.delete(
+                                        cacheName
+                                    );
+
+                                }
+
+                            }
+                        )
+
+                    );
+
+                })
+
+        );
+
+        self.clients.claim();
+
+    }
+);
+
+
+// =====================================
+// 網路請求
+// =====================================
+
+self.addEventListener(
+    "fetch",
+    function (event) {
+
+        if (
+            event.request.method !==
+            "GET"
+        ) {
+            return;
+        }
+
+        event.respondWith(
+
+            fetch(event.request)
+
+                .then(function (response) {
+
+                    const responseClone =
+                        response.clone();
+
+                    caches
+                        .open(CACHE_NAME)
+                        .then(function (cache) {
+
+                            cache.put(
+                                event.request,
+                                responseClone
+                            );
+
+                        });
+
+                    return response;
+
+                })
+
+                .catch(function () {
+
+                    return caches.match(
+                        event.request
+                    );
+
+                })
+
+        );
+
+    }
+);

@@ -40,6 +40,11 @@
     rel="stylesheet"
     href="css/mobile.css"
 >
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#15213b">
+
 </head>
 
 <body>
@@ -730,6 +735,35 @@
 
 <!-- 月曆模組 -->
 <script src="js/calendar.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", function () {
+
+        navigator.serviceWorker
+            .register("./service-worker.js")
+            .then(function (registration) {
+
+                console.log(
+                    "SmartBook Service Worker 註冊成功",
+                    registration.scope
+                );
+
+            })
+            .catch(function (error) {
+
+                console.error(
+                    "SmartBook Service Worker 註冊失敗",
+                    error
+                );
+
+            });
+
+    });
+
+}
+</script>
 
 </body>
 </html>
