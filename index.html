@@ -128,35 +128,43 @@
 
     </div>
 
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
 
-        <span id="userEmail">
-            尚未登入
-        </span>
+    <span id="userEmail">
+        尚未登入
+    </span>
 
-        <button
-            id="loginBtn"
-            class="btn btn-success"
-        >
-            Google 登入
-        </button>
+    <!-- SmartBook 雲端同步狀態 -->
+    <span
+        id="syncStatus"
+        class="smartbook-sync-status"
+    >
+        ☁️ 已同步
+    </span>
 
-        <button
-            id="logoutBtn"
-            class="btn btn-outline-danger"
-            style="display:none;"
-        >
-            登出
-        </button>
+    <button
+        id="loginBtn"
+        class="btn btn-success"
+    >
+        Google 登入
+    </button>
 
-        <a
-            href="transaction.html"
-            class="btn btn-primary"
-        >
-            ＋ 新增交易
-        </a>
+    <button
+        id="logoutBtn"
+        class="btn btn-outline-danger"
+        style="display:none;"
+    >
+        登出
+    </button>
 
-    </div>
+    <a
+        href="transaction.html"
+        class="btn btn-primary"
+    >
+        ＋ 新增交易
+    </a>
+
+</div>
 
 </header>
 

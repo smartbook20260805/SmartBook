@@ -46,6 +46,8 @@ function markPendingCloudSync() {
         "1"
     );
 
+    updateSyncStatus("pending");
+
     console.log(
         "SmartBook：資料等待雲端同步"
     );
@@ -59,10 +61,33 @@ function clearPendingCloudSync() {
         STORAGE_KEYS.pendingCloudSync
     );
 
+    updateSyncStatus("synced");
+
     console.log(
         "SmartBook：待同步狀態已清除"
     );
 
+}
+
+
+function updateSyncStatus(status) {
+
+    const statusElement =
+        document.getElementById("syncStatus");
+
+    if (!statusElement) return;
+
+    if (status === "offline") {
+        statusElement.textContent = "📴 離線";
+        return;
+    }
+
+    if (status === "pending") {
+        statusElement.textContent = "⏳ 等待同步";
+        return;
+    }
+
+    statusElement.textContent = "☁️ 已同步";
 }
 
 
@@ -436,6 +461,8 @@ window.addEventListener(
 
     function () {
 
+        updateSyncStatus("pending");
+        
         console.log(
             "SmartBook：網路已恢復"
         );
@@ -462,17 +489,16 @@ window.addEventListener(
 // =====================================
 
 window.addEventListener(
-
     "offline",
-
     function () {
+
+        updateSyncStatus("offline");
 
         console.log(
             "SmartBook：目前為離線模式"
         );
 
     }
-
 );
 
 
