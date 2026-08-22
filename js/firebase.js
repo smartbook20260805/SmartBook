@@ -616,67 +616,121 @@ onAuthStateChanged(
 
 
         // =====================================
-        // 已登入
+// 已登入
+// =====================================
+
+if (user) {
+
+    console.log(
+        "Firebase 使用者已登入：",
+        user.email
+    );
+
+    try {
+
+        const hasPending =
+            typeof hasPendingCloudSync === "function"
+                ? hasPendingCloudSync()
+                : false;
+
+
+        // =====================================
+        // 情況 1：
+        // 本機有尚未同步的離線資料
+        // → 先上傳本機，避免被舊雲端覆蓋
         // =====================================
 
-        if (user) {
+        if (hasPending) {
 
             console.log(
-                "Firebase 使用者已登入：",
-                user.email
+                "偵測到本機待同步資料，優先上傳"
             );
 
+            cloudSyncReady = true;
 
-            try {
+            const uploaded =
+                await uploadLocalDataToCloud();
 
-                // 先下載雲端
-                const downloaded =
-                    await downloadCloudData();
+            if (uploaded) {
 
-
-                // 如果此帳號雲端完全沒有資料，
-                // 才使用目前本機資料建立第一份雲端資料。
-                if (!downloaded) {
-
-                    console.log(
-                        "第一次使用此帳號，準備建立雲端資料"
-                    );
-
-                    cloudSyncReady = true;
-
-                    await uploadLocalDataToCloud();
-
-                } else {
-
-                    cloudSyncReady = true;
-
+                if (
+                    typeof clearPendingCloudSync ===
+                    "function"
+                ) {
+                    clearPendingCloudSync();
                 }
 
-
                 console.log(
-                    "SmartBook 雲端同步已就緒"
+                    "離線資料已成功同步至雲端"
                 );
 
+            } else {
 
-                // 啟動即時同步
-                startRealtimeSync();
-
-
-            } catch (error) {
-
-                cloudSyncReady = false;
-
-                console.error(
-                    "登入後同步初始化失敗：",
-                    error
+                console.warn(
+                    "離線資料尚未成功上傳"
                 );
 
             }
 
+        }
 
-            return;
+
+        // =====================================
+        // 情況 2：
+        // 本機沒有待同步資料
+        // → 正常從雲端下載
+        // =====================================
+
+        else {
+
+            const downloaded =
+                await downloadCloudData();
+
+
+            // 此帳號完全沒有雲端資料
+            if (!downloaded) {
+
+                console.log(
+                    "第一次使用此帳號，準備建立雲端資料"
+                );
+
+                cloudSyncReady = true;
+
+                await uploadLocalDataToCloud();
+
+            } else {
+
+                cloudSyncReady = true;
+
+            }
 
         }
+
+
+        console.log(
+            "SmartBook 雲端同步已就緒"
+        );
+
+
+        // 啟動即時同步
+        startRealtimeSync();
+
+
+    } catch (error) {
+
+        cloudSyncReady = false;
+
+        console.error(
+            "登入後同步初始化失敗：",
+            error
+        );
+
+    }
+
+
+    return;
+
+}
 
 
         // =====================================

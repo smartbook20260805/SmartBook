@@ -1,17 +1,188 @@
 // =====================================
 // SmartBook Storage Module
+// V6.1 Offline Sync
 // =====================================
 
 console.log("Storage Module Loaded");
 
+
 const STORAGE_KEYS = {
+
     transactions: "transactions",
+
     monthlyBudget: "monthlyBudget",
-    categories: "smartbookCategories"
+
+    categories: "smartbookCategories",
+
+    pendingCloudSync:
+        "smartbookPendingCloudSync"
+
 };
+
 
 // 雲端儲存延遲計時器
 let cloudSaveTimer = null;
+
+
+// =====================================
+// 待同步狀態
+// =====================================
+
+function hasPendingCloudSync() {
+
+    return (
+        localStorage.getItem(
+            STORAGE_KEYS.pendingCloudSync
+        ) === "1"
+    );
+
+}
+
+
+function markPendingCloudSync() {
+
+    localStorage.setItem(
+        STORAGE_KEYS.pendingCloudSync,
+        "1"
+    );
+
+    console.log(
+        "SmartBook：資料等待雲端同步"
+    );
+
+}
+
+
+function clearPendingCloudSync() {
+
+    localStorage.removeItem(
+        STORAGE_KEYS.pendingCloudSync
+    );
+
+    console.log(
+        "SmartBook：待同步狀態已清除"
+    );
+
+}
+
+
+// =====================================
+// 執行 Firebase 雲端同步
+// =====================================
+
+async function runCloudSave() {
+
+    // 沒網路
+    if (!navigator.onLine) {
+
+        console.log(
+            "目前離線，資料已保存在本機"
+        );
+
+        markPendingCloudSync();
+
+        return false;
+
+    }
+
+
+    // Firebase 尚未載入
+    if (
+        !window.smartbookFirebase ||
+        typeof window.smartbookFirebase
+            .uploadLocalDataToCloud !==
+            "function"
+    ) {
+
+        console.log(
+            "Firebase 尚未載入，稍後再同步"
+        );
+
+        markPendingCloudSync();
+
+        return false;
+
+    }
+
+
+    // 尚未登入
+    const user =
+        window.smartbookFirebase
+            .getCurrentUser();
+
+
+    if (!user) {
+
+        console.log(
+            "尚未登入，資料保留在本機"
+        );
+
+        markPendingCloudSync();
+
+        return false;
+
+    }
+
+
+    // Firebase 初始化尚未完成
+    if (
+        typeof window.smartbookFirebase
+            .isCloudSyncReady ===
+            "function" &&
+        !window.smartbookFirebase
+            .isCloudSyncReady()
+    ) {
+
+        console.log(
+            "Firebase 尚未完成初始化，稍後再同步"
+        );
+
+        markPendingCloudSync();
+
+        return false;
+
+    }
+
+
+    try {
+
+        const success =
+            await window.smartbookFirebase
+                .uploadLocalDataToCloud();
+
+
+        if (success) {
+
+            clearPendingCloudSync();
+
+            console.log(
+                "SmartBook：雲端同步完成"
+            );
+
+            return true;
+
+        }
+
+
+        markPendingCloudSync();
+
+        return false;
+
+
+    } catch (error) {
+
+        console.error(
+            "SmartBook 雲端同步失敗：",
+            error
+        );
+
+        markPendingCloudSync();
+
+        return false;
+
+    }
+
+}
 
 
 // =====================================
@@ -20,53 +191,50 @@ let cloudSaveTimer = null;
 
 function scheduleCloudSave() {
 
-    // 避免短時間內連續上傳很多次
-    clearTimeout(cloudSaveTimer);
+    markPendingCloudSync();
 
-    cloudSaveTimer = setTimeout(
-        async function () {
-
-            if (
-                !window.smartbookFirebase ||
-                typeof window.smartbookFirebase
-                    .uploadLocalDataToCloud !== "function"
-            ) {
-                console.log(
-                    "Firebase 尚未載入，僅儲存本機資料"
-                );
-
-                return;
-            }
-
-            const user =
-                window.smartbookFirebase
-                    .getCurrentUser();
-
-            if (!user) {
-                console.log(
-                    "尚未登入，僅儲存本機資料"
-                );
-
-                return;
-            }
-
-            try {
-
-                await window.smartbookFirebase
-                    .uploadLocalDataToCloud();
-
-            } catch (error) {
-
-                console.error(
-                    "SmartBook 雲端同步失敗：",
-                    error
-                );
-
-            }
-
-        },
-        500
+    clearTimeout(
+        cloudSaveTimer
     );
+
+
+    cloudSaveTimer =
+        setTimeout(
+
+            function () {
+
+                runCloudSave();
+
+            },
+
+            500
+
+        );
+
+}
+
+
+// =====================================
+// 手動重試待同步資料
+// =====================================
+
+async function retryPendingCloudSync() {
+
+    if (
+        !hasPendingCloudSync()
+    ) {
+
+        return true;
+
+    }
+
+
+    console.log(
+        "SmartBook：發現待同步資料，開始重試"
+    );
+
+
+    return await runCloudSave();
 
 }
 
@@ -84,9 +252,11 @@ function getTransactions() {
                 STORAGE_KEYS.transactions
             );
 
+
         return data
             ? JSON.parse(data)
             : [];
+
 
     } catch (error) {
 
@@ -111,11 +281,14 @@ function saveTransactions(data) {
             JSON.stringify(data)
         );
 
+
         console.log(
             "交易資料已儲存到本機"
         );
 
+
         scheduleCloudSave();
+
 
     } catch (error) {
 
@@ -138,10 +311,13 @@ function getBudget() {
     try {
 
         return Number(
+
             localStorage.getItem(
                 STORAGE_KEYS.monthlyBudget
             )
+
         ) || 0;
+
 
     } catch (error) {
 
@@ -166,11 +342,14 @@ function saveBudget(value) {
             String(value)
         );
 
+
         console.log(
             "預算已儲存到本機"
         );
 
+
         scheduleCloudSave();
+
 
     } catch (error) {
 
@@ -197,9 +376,11 @@ function getCategoryStorage() {
                 STORAGE_KEYS.categories
             );
 
+
         return data
             ? JSON.parse(data)
             : [];
+
 
     } catch (error) {
 
@@ -224,11 +405,14 @@ function saveCategoryStorage(data) {
             JSON.stringify(data)
         );
 
+
         console.log(
             "分類已儲存到本機"
         );
 
+
         scheduleCloudSave();
+
 
     } catch (error) {
 
@@ -240,3 +424,94 @@ function saveCategoryStorage(data) {
     }
 
 }
+
+
+// =====================================
+// 網路恢復
+// =====================================
+
+window.addEventListener(
+
+    "online",
+
+    function () {
+
+        console.log(
+            "SmartBook：網路已恢復"
+        );
+
+
+        // 稍微延遲，
+        // 讓 Firebase 先恢復連線
+        setTimeout(
+            function () {
+
+                retryPendingCloudSync();
+
+            },
+            1000
+        );
+
+    }
+
+);
+
+
+// =====================================
+// 網路中斷
+// =====================================
+
+window.addEventListener(
+
+    "offline",
+
+    function () {
+
+        console.log(
+            "SmartBook：目前為離線模式"
+        );
+
+    }
+
+);
+
+
+// =====================================
+// Firebase 登入完成後
+// 有待同步資料就再嘗試一次
+// =====================================
+
+window.addEventListener(
+
+    "smartbook-auth-changed",
+
+    function (event) {
+
+        const user =
+            event.detail
+                ? event.detail.user
+                : null;
+
+
+        if (!user) {
+            return;
+        }
+
+
+        setTimeout(
+            function () {
+
+                retryPendingCloudSync();
+
+            },
+            1500
+        );
+
+    }
+
+);
+
+
+console.log(
+    "SmartBook Offline Storage Ready"
+);
