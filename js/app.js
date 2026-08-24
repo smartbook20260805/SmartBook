@@ -1545,6 +1545,346 @@ function loadFinancialSummary() {
 
 }
 
+// ===============================
+// V7.0 自動財務建議
+// ===============================
+
+function loadFinancialAdvice() {
+
+    const adviceArea =
+        document.getElementById(
+            "financialAdvice"
+        );
+
+    if (!adviceArea) {
+        return;
+    }
+
+
+    const transactions =
+        getTransactions();
+
+    const now =
+        new Date();
+
+    const currentYear =
+        now.getFullYear();
+
+    const currentMonth =
+        now.getMonth();
+
+
+    const previousDate =
+        new Date(
+            currentYear,
+            currentMonth - 1,
+            1
+        );
+
+    const previousYear =
+        previousDate.getFullYear();
+
+    const previousMonth =
+        previousDate.getMonth();
+
+
+    let currentExpense = 0;
+    let previousExpense = 0;
+
+    const categoryTotals = {};
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (
+                !transaction.date ||
+                transaction.type !== "支出"
+            ) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+            const year =
+                transactionDate
+                    .getFullYear();
+
+            const month =
+                transactionDate
+                    .getMonth();
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            // 本月
+            if (
+                year === currentYear &&
+                month === currentMonth
+            ) {
+
+                currentExpense +=
+                    amount;
+
+
+                const category =
+                    transaction.category ||
+                    "其他";
+
+
+                categoryTotals[category] =
+                    (
+                        categoryTotals[category] ||
+                        0
+                    ) + amount;
+
+            }
+
+
+            // 上月
+            if (
+                year === previousYear &&
+                month === previousMonth
+            ) {
+
+                previousExpense +=
+                    amount;
+
+            }
+
+        }
+    );
+
+
+    const adviceList = [];
+
+
+    // ===============================
+    // 1. 本月 vs 上月支出
+    // ===============================
+
+    if (previousExpense > 0) {
+
+        const difference =
+            currentExpense -
+            previousExpense;
+
+        const percentage =
+            (
+                difference /
+                previousExpense
+            ) * 100;
+
+
+        if (percentage >= 20) {
+
+            adviceList.push(
+                `⚠️ 本月支出比上月增加 ${percentage.toFixed(1)}%，建議留意近期支出。`
+            );
+
+        }
+        else if (percentage > 0) {
+
+            adviceList.push(
+                `📈 本月支出比上月增加 ${percentage.toFixed(1)}%。`
+            );
+
+        }
+        else if (percentage <= -10) {
+
+            adviceList.push(
+                `✅ 本月支出比上月減少 ${Math.abs(percentage).toFixed(1)}%，支出控制有改善。`
+            );
+
+        }
+        else {
+
+            adviceList.push(
+                "➖ 本月支出與上月差異不大。"
+            );
+
+        }
+
+    }
+    else if (currentExpense > 0) {
+
+        adviceList.push(
+            "ℹ️ 上月沒有支出資料，目前無法進行完整月度比較。"
+        );
+
+    }
+
+
+    // ===============================
+    // 2. 最高支出分類
+    // ===============================
+
+    const categoryEntries =
+        Object.entries(
+            categoryTotals
+        );
+
+
+    if (categoryEntries.length > 0) {
+
+        categoryEntries.sort(
+            function (a, b) {
+
+                return b[1] - a[1];
+
+            }
+        );
+
+
+        const [
+            topCategory,
+            topAmount
+        ] = categoryEntries[0];
+
+
+        const categoryRate =
+            currentExpense > 0
+                ? (
+                    topAmount /
+                    currentExpense
+                ) * 100
+                : 0;
+
+
+        adviceList.push(
+            `🏆 本月最高支出分類是「${topCategory}」，占本月支出 ${categoryRate.toFixed(1)}%。`
+        );
+
+    }
+
+
+    // ===============================
+    // 3. 預算使用率
+    // ===============================
+
+    const monthlyBudget =
+        typeof getBudget === "function"
+            ? getBudget()
+            : Number(
+                localStorage.getItem(
+                    "monthlyBudget"
+                )
+            ) || 0;
+
+
+    if (monthlyBudget > 0) {
+
+        const usageRate =
+            (
+                currentExpense /
+                monthlyBudget
+            ) * 100;
+
+
+        if (usageRate >= 100) {
+
+            adviceList.push(
+                `🚨 本月預算已使用 ${usageRate.toFixed(1)}%，目前已超出設定預算。`
+            );
+
+        }
+        else if (usageRate >= 80) {
+
+            adviceList.push(
+                `⚠️ 本月預算已使用 ${usageRate.toFixed(1)}%，接近預算上限。`
+            );
+
+        }
+        else if (usageRate >= 50) {
+
+            adviceList.push(
+                `💡 本月預算已使用 ${usageRate.toFixed(1)}%，目前仍在可控範圍。`
+            );
+
+        }
+        else {
+
+            adviceList.push(
+                `✅ 本月預算使用率為 ${usageRate.toFixed(1)}%，目前預算狀況良好。`
+            );
+
+        }
+
+    }
+    else {
+
+        adviceList.push(
+            "🎯 尚未設定每月預算，可到系統設定新增預算。"
+        );
+
+    }
+
+
+    // ===============================
+    // 4. 每日平均支出
+    // ===============================
+
+    const daysPassed =
+        now.getDate();
+
+
+    const averageDailyExpense =
+        daysPassed > 0
+            ? currentExpense /
+              daysPassed
+            : 0;
+
+
+    adviceList.push(
+        `📅 本月目前每日平均支出約 NT$ ${Math.round(averageDailyExpense).toLocaleString()}。`
+    );
+
+
+    // ===============================
+    // 顯示結果
+    // ===============================
+
+    if (adviceList.length === 0) {
+
+        adviceArea.innerHTML = `
+            <p class="text-muted mb-0">
+                目前資料不足，暫時無法產生財務建議。
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    adviceArea.innerHTML = `
+        <ul class="mb-0">
+            ${adviceList
+                .map(
+                    function (advice) {
+
+                        return `
+                            <li class="mb-2">
+                                ${advice}
+                            </li>
+                        `;
+
+                    }
+                )
+                .join("")}
+        </ul>
+    `;
+
+}
+
 
 // ===============================
 // 支出分類統計
@@ -1953,6 +2293,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadMonthComparison();
     loadSixMonthTrendChart();
     loadFinancialSummary();
+    loadFinancialAdvice();
     loadCategorySummary();
     loadExpenseChart();
     loadSummaryChart();
@@ -2166,6 +2507,10 @@ function refreshSmartBookAfterCloudSync() {
 
     if (typeof loadFinancialSummary === "function") {
     loadFinancialSummary();
+    }
+
+    if (typeof loadFinancialAdvice === "function") {
+    loadFinancialAdvice();
     }
 
     if (typeof loadCategorySummary === "function") {
