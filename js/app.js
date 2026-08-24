@@ -1304,6 +1304,247 @@ function loadSixMonthTrendChart() {
 }
 
 
+// ===============================
+// V7.0 本月財務分析摘要
+// ===============================
+
+function loadFinancialSummary() {
+
+    const topCategoryElement =
+        document.getElementById("topExpenseCategory");
+
+    const topCategoryAmountElement =
+        document.getElementById("topExpenseCategoryAmount");
+
+    const largestExpenseElement =
+        document.getElementById("largestExpense");
+
+    const largestExpenseItemElement =
+        document.getElementById("largestExpenseItem");
+
+    const averageDailyExpenseElement =
+        document.getElementById("averageDailyExpense");
+
+    const budgetUsageRateElement =
+        document.getElementById("budgetUsageRate");
+
+    const budgetUsageDetailElement =
+        document.getElementById("budgetUsageDetail");
+
+
+    // 不是報表頁就不執行
+    if (
+        !topCategoryElement ||
+        !topCategoryAmountElement ||
+        !largestExpenseElement ||
+        !largestExpenseItemElement ||
+        !averageDailyExpenseElement ||
+        !budgetUsageRateElement ||
+        !budgetUsageDetailElement
+    ) {
+        return;
+    }
+
+
+    const transactions =
+        getTransactions();
+
+    const now =
+        new Date();
+
+    const currentYear =
+        now.getFullYear();
+
+    const currentMonth =
+        now.getMonth();
+
+
+    let totalExpense = 0;
+
+    let largestExpense = 0;
+
+    let largestExpenseItem = "";
+
+    const categoryTotals = {};
+
+
+    transactions.forEach(function (transaction) {
+
+        if (
+            transaction.type !== "支出" ||
+            !transaction.date
+        ) {
+            return;
+        }
+
+
+        const transactionDate =
+            new Date(
+                transaction.date +
+                "T00:00:00"
+            );
+
+
+        if (
+            transactionDate.getFullYear() !== currentYear ||
+            transactionDate.getMonth() !== currentMonth
+        ) {
+            return;
+        }
+
+
+        const amount =
+            Number(transaction.amount) || 0;
+
+        const category =
+            transaction.category || "其他";
+
+
+        // 本月總支出
+        totalExpense += amount;
+
+
+        // 分類統計
+        categoryTotals[category] =
+            (categoryTotals[category] || 0) +
+            amount;
+
+
+        // 最大單筆支出
+        if (amount > largestExpense) {
+
+            largestExpense =
+                amount;
+
+            largestExpenseItem =
+                transaction.item || "未填寫項目";
+
+        }
+
+    });
+
+
+    // ===============================
+    // 最高支出分類
+    // ===============================
+
+    const categoryEntries =
+        Object.entries(categoryTotals);
+
+    if (categoryEntries.length > 0) {
+
+        categoryEntries.sort(
+            function (a, b) {
+                return b[1] - a[1];
+            }
+        );
+
+
+        const [
+            topCategory,
+            topAmount
+        ] = categoryEntries[0];
+
+
+        topCategoryElement.textContent =
+            topCategory;
+
+        topCategoryAmountElement.textContent =
+            "NT$ " +
+            topAmount.toLocaleString();
+
+    } else {
+
+        topCategoryElement.textContent =
+            "尚無資料";
+
+        topCategoryAmountElement.textContent =
+            "NT$ 0";
+
+    }
+
+
+    // ===============================
+    // 最大單筆支出
+    // ===============================
+
+    largestExpenseElement.textContent =
+        "NT$ " +
+        largestExpense.toLocaleString();
+
+
+    largestExpenseItemElement.textContent =
+        largestExpense > 0
+            ? largestExpenseItem
+            : "尚無資料";
+
+
+    // ===============================
+    // 每日平均支出
+    // 以本月目前經過天數計算
+    // ===============================
+
+    const daysPassed =
+        now.getDate();
+
+
+    const averageDailyExpense =
+        daysPassed > 0
+            ? totalExpense / daysPassed
+            : 0;
+
+
+    averageDailyExpenseElement.textContent =
+        "NT$ " +
+        Math.round(
+            averageDailyExpense
+        ).toLocaleString();
+
+
+    // ===============================
+    // 預算使用率
+    // ===============================
+
+    const monthlyBudget =
+        typeof getBudget === "function"
+            ? getBudget()
+            : Number(
+                localStorage.getItem(
+                    "monthlyBudget"
+                )
+            ) || 0;
+
+
+    if (monthlyBudget <= 0) {
+
+        budgetUsageRateElement.textContent =
+            "未設定";
+
+        budgetUsageDetailElement.textContent =
+            "請先設定每月預算";
+
+        return;
+
+    }
+
+
+    const usageRate =
+        (
+            totalExpense /
+            monthlyBudget
+        ) * 100;
+
+
+    budgetUsageRateElement.textContent =
+        usageRate.toFixed(1) +
+        "%";
+
+
+    budgetUsageDetailElement.textContent =
+        `NT$ ${totalExpense.toLocaleString()} / NT$ ${monthlyBudget.toLocaleString()}`;
+
+}
+
 
 // ===============================
 // 支出分類統計
@@ -1711,6 +1952,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadMonthlyReport();
     loadMonthComparison();
     loadSixMonthTrendChart();
+    loadFinancialSummary();
     loadCategorySummary();
     loadExpenseChart();
     loadSummaryChart();
@@ -1920,6 +2162,10 @@ function refreshSmartBookAfterCloudSync() {
     // V7.0 最近 6 個月財務趨勢
     if (typeof loadSixMonthTrendChart === "function") {
         loadSixMonthTrendChart();
+    }
+
+    if (typeof loadFinancialSummary === "function") {
+    loadFinancialSummary();
     }
 
     if (typeof loadCategorySummary === "function") {
