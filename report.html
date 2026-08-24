@@ -150,13 +150,110 @@
     <hr class="my-4">
 
 
+<!-- =====================================
+     V7.0 本月 vs 上月財務比較
+     ===================================== -->
+
+<h4 class="mb-3">
+    📈 本月 vs 上月
+</h4>
+
+<div class="row mb-4">
+
+    <!-- 支出比較 -->
+    <div class="col-md-6 mb-3">
+
+        <div class="card p-3 h-100">
+
+            <h5>
+                💸 支出比較
+            </h5>
+
+            <p class="mb-1">
+                本月：
+                <strong id="currentMonthExpense">
+                    NT$ 0
+                </strong>
+            </p>
+
+            <p class="mb-1">
+                上月：
+                <strong id="previousMonthExpense">
+                    NT$ 0
+                </strong>
+            </p>
+
+            <div
+                id="expenseComparison"
+                class="mt-2"
+            >
+                尚無比較資料
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 收入比較 -->
+    <div class="col-md-6 mb-3">
+
+        <div class="card p-3 h-100">
+
+            <h5>
+                💰 收入比較
+            </h5>
+
+            <p class="mb-1">
+                本月：
+                <strong id="currentMonthIncome">
+                    NT$ 0
+                </strong>
+            </p>
+
+            <p class="mb-1">
+                上月：
+                <strong id="previousMonthIncome">
+                    NT$ 0
+                </strong>
+            </p>
+
+            <div
+                id="incomeComparison"
+                class="mt-2"
+            >
+                尚無比較資料
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<hr class="my-4">
+
+
+<!-- 最近 6 個月財務趨勢 -->
+
+<h4 class="mb-3">
+    📈 最近 6 個月財務趨勢
+</h4>
+
+<div
+    class="card p-3 mb-4"
+    style="height: 420px;"
+>
+    <canvas id="sixMonthTrendChart"></canvas>
+</div>
+
+
 <h4>📊 收入 / 支出 / 代墊比較</h4>
 
 <div class="card p-3 mb-4" style="height:400px;">
-
     <canvas id="summaryChart"></canvas>
-
 </div>
+
 
 <h4>📊 支出分類統計</h4>
 <div class="card p-3 mb-4" style="height: 400px;">

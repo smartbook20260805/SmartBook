@@ -649,6 +649,663 @@ function loadMonthlyReport() {
 }
 
 // ===============================
+// V7.0 本月 vs 上月財務比較
+// ===============================
+
+function loadMonthComparison() {
+
+    const currentExpenseElement =
+        document.getElementById(
+            "currentMonthExpense"
+        );
+
+    const previousExpenseElement =
+        document.getElementById(
+            "previousMonthExpense"
+        );
+
+    const expenseComparisonElement =
+        document.getElementById(
+            "expenseComparison"
+        );
+
+    const currentIncomeElement =
+        document.getElementById(
+            "currentMonthIncome"
+        );
+
+    const previousIncomeElement =
+        document.getElementById(
+            "previousMonthIncome"
+        );
+
+    const incomeComparisonElement =
+        document.getElementById(
+            "incomeComparison"
+        );
+
+
+    // 不是報表頁就不執行
+    if (
+        !currentExpenseElement ||
+        !previousExpenseElement ||
+        !expenseComparisonElement ||
+        !currentIncomeElement ||
+        !previousIncomeElement ||
+        !incomeComparisonElement
+    ) {
+        return;
+    }
+
+
+    const transactions =
+        getTransactions();
+
+
+    const now =
+        new Date();
+
+    const currentYear =
+        now.getFullYear();
+
+    const currentMonth =
+        now.getMonth();
+
+
+    // 上個月
+    const previousDate =
+        new Date(
+            currentYear,
+            currentMonth - 1,
+            1
+        );
+
+    const previousYear =
+        previousDate.getFullYear();
+
+    const previousMonth =
+        previousDate.getMonth();
+
+
+    let currentExpense = 0;
+
+    let previousExpense = 0;
+
+    let currentIncome = 0;
+
+    let previousIncome = 0;
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (!transaction.date) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+
+            const year =
+                transactionDate
+                    .getFullYear();
+
+            const month =
+                transactionDate
+                    .getMonth();
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            // 本月
+            if (
+                year === currentYear &&
+                month === currentMonth
+            ) {
+
+                if (
+                    transaction.type ===
+                    "支出"
+                ) {
+                    currentExpense +=
+                        amount;
+                }
+
+                if (
+                    transaction.type ===
+                    "收入"
+                ) {
+                    currentIncome +=
+                        amount;
+                }
+
+            }
+
+
+            // 上月
+            if (
+                year === previousYear &&
+                month === previousMonth
+            ) {
+
+                if (
+                    transaction.type ===
+                    "支出"
+                ) {
+                    previousExpense +=
+                        amount;
+                }
+
+                if (
+                    transaction.type ===
+                    "收入"
+                ) {
+                    previousIncome +=
+                        amount;
+                }
+
+            }
+
+        }
+    );
+
+
+    // ===============================
+    // 顯示金額
+    // ===============================
+
+    currentExpenseElement.textContent =
+        "NT$ " +
+        currentExpense.toLocaleString();
+
+    previousExpenseElement.textContent =
+        "NT$ " +
+        previousExpense.toLocaleString();
+
+    currentIncomeElement.textContent =
+        "NT$ " +
+        currentIncome.toLocaleString();
+
+    previousIncomeElement.textContent =
+        "NT$ " +
+        previousIncome.toLocaleString();
+
+
+    // ===============================
+    // 支出比較
+    // ===============================
+
+    renderMonthComparisonResult(
+        currentExpense,
+        previousExpense,
+        expenseComparisonElement,
+        "支出"
+    );
+
+
+    // ===============================
+    // 收入比較
+    // ===============================
+
+    renderMonthComparisonResult(
+        currentIncome,
+        previousIncome,
+        incomeComparisonElement,
+        "收入"
+    );
+
+}
+
+
+// ===============================
+// 月份比較文字
+// ===============================
+
+function renderMonthComparisonResult(
+    currentValue,
+    previousValue,
+    element,
+    type
+) {
+
+    if (!element) {
+        return;
+    }
+
+
+    // 上月沒有資料
+    if (previousValue === 0) {
+
+        if (currentValue === 0) {
+
+            element.innerHTML =
+                `<span class="text-muted">
+                    本月與上月皆無${type}資料
+                </span>`;
+
+        } else {
+
+            element.innerHTML =
+                `<span class="text-primary">
+                    本月新增 ${type}
+                    NT$ ${currentValue.toLocaleString()}
+                </span>`;
+
+        }
+
+        return;
+
+    }
+
+
+    const difference =
+        currentValue -
+        previousValue;
+
+
+    const percentage =
+        (
+            difference /
+            previousValue
+        ) * 100;
+
+
+    // 完全相同
+    if (difference === 0) {
+
+        element.innerHTML =
+            `<span class="text-muted">
+                ➖ 與上月相同
+            </span>`;
+
+        return;
+
+    }
+
+
+    // 增加
+    if (difference > 0) {
+
+        const className =
+            type === "支出"
+                ? "text-danger"
+                : "text-success";
+
+
+        element.innerHTML =
+            `<span class="${className}">
+                ↑ 比上月增加
+                ${Math.abs(percentage).toFixed(1)}%
+                （NT$ ${Math.abs(difference).toLocaleString()}）
+            </span>`;
+
+        return;
+
+    }
+
+
+    // 減少
+    const className =
+        type === "支出"
+            ? "text-success"
+            : "text-danger";
+
+
+    element.innerHTML =
+        `<span class="${className}">
+            ↓ 比上月減少
+            ${Math.abs(percentage).toFixed(1)}%
+            （NT$ ${Math.abs(difference).toLocaleString()}）
+        </span>`;
+
+}
+
+
+// ===============================
+// V7.0 最近 6 個月財務趨勢
+// ===============================
+
+function loadSixMonthTrendChart() {
+
+    const canvas =
+        document.getElementById(
+            "sixMonthTrendChart"
+        );
+
+    if (!canvas) return;
+
+    if (typeof Chart === "undefined") {
+
+        console.error(
+            "Chart.js 尚未成功載入"
+        );
+
+        return;
+
+    }
+
+
+    const transactions =
+        getTransactions();
+
+
+    const now =
+        new Date();
+
+
+    const months = [];
+
+
+    // 建立最近 6 個月
+    for (
+        let index = 5;
+        index >= 0;
+        index--
+    ) {
+
+        const date =
+            new Date(
+                now.getFullYear(),
+                now.getMonth() - index,
+                1
+            );
+
+
+        months.push({
+
+            year:
+                date.getFullYear(),
+
+            month:
+                date.getMonth(),
+
+            label:
+                `${date.getMonth() + 1}月`,
+
+            income: 0,
+
+            expense: 0,
+
+            balance: 0
+
+        });
+
+    }
+
+
+    // ===============================
+    // 統計交易
+    // ===============================
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (!transaction.date) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+
+            const targetMonth =
+                months.find(
+                    function (monthData) {
+
+                        return (
+                            monthData.year ===
+                                transactionDate
+                                    .getFullYear() &&
+
+                            monthData.month ===
+                                transactionDate
+                                    .getMonth()
+                        );
+
+                    }
+                );
+
+
+            if (!targetMonth) {
+                return;
+            }
+
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            if (
+                transaction.type ===
+                "收入"
+            ) {
+
+                targetMonth.income +=
+                    amount;
+
+            }
+
+
+            if (
+                transaction.type ===
+                "支出"
+            ) {
+
+                targetMonth.expense +=
+                    amount;
+
+            }
+
+        }
+    );
+
+
+    // ===============================
+    // 計算餘額
+    // ===============================
+
+    months.forEach(
+        function (monthData) {
+
+            monthData.balance =
+                monthData.income -
+                monthData.expense;
+
+        }
+    );
+
+
+    const labels =
+        months.map(
+            function (monthData) {
+
+                return monthData.label;
+
+            }
+        );
+
+
+    const incomeData =
+        months.map(
+            function (monthData) {
+
+                return monthData.income;
+
+            }
+        );
+
+
+    const expenseData =
+        months.map(
+            function (monthData) {
+
+                return monthData.expense;
+
+            }
+        );
+
+
+    const balanceData =
+        months.map(
+            function (monthData) {
+
+                return monthData.balance;
+
+            }
+        );
+
+
+    // 舊圖表存在就先刪除
+    const existingChart =
+        Chart.getChart(canvas);
+
+
+    if (existingChart) {
+
+        existingChart.destroy();
+
+    }
+
+
+    // ===============================
+    // 建立折線圖
+    // ===============================
+
+    new Chart(
+
+        canvas,
+
+        {
+
+            type: "line",
+
+            data: {
+
+                labels,
+
+                datasets: [
+
+                    {
+                        label: "收入",
+                        data: incomeData,
+                        tension: 0.3
+                    },
+
+                    {
+                        label: "支出",
+                        data: expenseData,
+                        tension: 0.3
+                    },
+
+                    {
+                        label: "餘額",
+                        data: balanceData,
+                        tension: 0.3
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+
+                    mode: "index",
+
+                    intersect: false
+
+                },
+
+                plugins: {
+
+                    legend: {
+
+                        position: "bottom"
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function (context) {
+
+                                    const value =
+                                        Number(
+                                            context.raw
+                                        ) || 0;
+
+
+                                    return (
+                                        context.dataset.label +
+                                        "：NT$ " +
+                                        value.toLocaleString()
+                                    );
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            callback:
+                                function (value) {
+
+                                    return (
+                                        "NT$ " +
+                                        Number(value)
+                                            .toLocaleString()
+                                    );
+
+                                }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
+
+
+
+// ===============================
 // 支出分類統計
 // ===============================
 function loadCategorySummary() {
@@ -1052,6 +1709,8 @@ document.addEventListener("DOMContentLoaded", function () {
     loadRecentTransactions();
     loadAdvanceSummary();
     loadMonthlyReport();
+    loadMonthComparison();
+    loadSixMonthTrendChart();
     loadCategorySummary();
     loadExpenseChart();
     loadSummaryChart();
@@ -1168,7 +1827,11 @@ window.addEventListener("pageshow", function () {
     updateDashboard();
     loadRecentTransactions();
     loadAdvanceSummary();
+
     loadMonthlyReport();
+    loadMonthComparison();
+    loadSixMonthTrendChart();
+
     loadCategorySummary();
 
     if (typeof loadExpenseChart === "function") {
@@ -1180,6 +1843,7 @@ window.addEventListener("pageshow", function () {
     }
 
 });
+
 // ===============================
 // Firebase Google 登入介面
 // ===============================
@@ -1240,8 +1904,22 @@ function refreshSmartBookAfterCloudSync() {
         loadAdvanceSummary();
     }
 
+    // ===============================
+    // 報表
+    // ===============================
+
     if (typeof loadMonthlyReport === "function") {
         loadMonthlyReport();
+    }
+
+    // V7.0 本月 vs 上月
+    if (typeof loadMonthComparison === "function") {
+        loadMonthComparison();
+    }
+
+    // V7.0 最近 6 個月財務趨勢
+    if (typeof loadSixMonthTrendChart === "function") {
+        loadSixMonthTrendChart();
     }
 
     if (typeof loadCategorySummary === "function") {
@@ -1256,17 +1934,33 @@ function refreshSmartBookAfterCloudSync() {
         loadSummaryChart();
     }
 
+    // ===============================
+    // 預算
+    // ===============================
+
     if (typeof updateBudgetDashboard === "function") {
         updateBudgetDashboard();
     }
+
+    // ===============================
+    // 分類
+    // ===============================
 
     if (typeof refreshCategorySelects === "function") {
         refreshCategorySelects();
     }
 
+    // ===============================
+    // Dashboard 分析
+    // ===============================
+
     if (typeof refreshDashboardAnalytics === "function") {
         refreshDashboardAnalytics();
     }
+
+    // ===============================
+    // 行事曆
+    // ===============================
 
     if (typeof refreshCalendar === "function") {
         refreshCalendar();
