@@ -557,9 +557,16 @@ function loadMonthlyReport() {
 
     const transactions = getTransactions();
 
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
+   const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
+
+const currentYear =
+    reportDate.getFullYear();
+
+const currentMonth =
+    reportDate.getMonth();
 
     const monthlyTransactions = transactions.filter(transaction => {
 
@@ -702,14 +709,16 @@ function loadMonthComparison() {
         getTransactions();
 
 
-    const now =
-        new Date();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
 
-    const currentYear =
-        now.getFullYear();
+const currentYear =
+    reportDate.getFullYear();
 
-    const currentMonth =
-        now.getMonth();
+const currentMonth =
+    reportDate.getMonth();
 
 
     // 上個月
@@ -973,6 +982,7 @@ function renderMonthComparisonResult(
 // V7.0 最近 6 個月財務趨勢
 // ===============================
 
+
 function loadSixMonthTrendChart() {
 
     const canvas =
@@ -997,8 +1007,10 @@ function loadSixMonthTrendChart() {
         getTransactions();
 
 
-    const now =
-        new Date();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
 
 
     const months = [];
@@ -1012,11 +1024,11 @@ function loadSixMonthTrendChart() {
     ) {
 
         const date =
-            new Date(
-                now.getFullYear(),
-                now.getMonth() - index,
-                1
-            );
+    new Date(
+        reportDate.getFullYear(),
+        reportDate.getMonth() - index,
+        1
+    );
 
 
         months.push({
@@ -1349,14 +1361,16 @@ function loadFinancialSummary() {
     const transactions =
         getTransactions();
 
-    const now =
-        new Date();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
 
-    const currentYear =
-        now.getFullYear();
+const currentYear =
+    reportDate.getFullYear();
 
-    const currentMonth =
-        now.getMonth();
+const currentMonth =
+    reportDate.getMonth();
 
 
     let totalExpense = 0;
@@ -1484,8 +1498,32 @@ function loadFinancialSummary() {
     // 以本月目前經過天數計算
     // ===============================
 
-    const daysPassed =
-        now.getDate();
+    const today =
+    new Date();
+
+let daysPassed;
+
+const isCurrentMonth =
+    currentYear === today.getFullYear() &&
+    currentMonth === today.getMonth();
+
+if (isCurrentMonth) {
+
+    // 當月：用今天是幾號
+    daysPassed =
+        today.getDate();
+
+} else {
+
+    // 歷史月份：用該月完整天數
+    daysPassed =
+        new Date(
+            currentYear,
+            currentMonth + 1,
+            0
+        ).getDate();
+
+}
 
 
     const averageDailyExpense =
@@ -1564,14 +1602,16 @@ function loadFinancialAdvice() {
     const transactions =
         getTransactions();
 
-    const now =
-        new Date();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
 
-    const currentYear =
-        now.getFullYear();
+const currentYear =
+    reportDate.getFullYear();
 
-    const currentMonth =
-        now.getMonth();
+const currentMonth =
+    reportDate.getMonth();
 
 
     const previousDate =
@@ -1832,8 +1872,32 @@ function loadFinancialAdvice() {
     // 4. 每日平均支出
     // ===============================
 
-    const daysPassed =
-        now.getDate();
+    const today =
+    new Date();
+
+let daysPassed;
+
+const isCurrentMonth =
+    currentYear === today.getFullYear() &&
+    currentMonth === today.getMonth();
+
+if (isCurrentMonth) {
+
+    // 目前月份：計算到今天
+    daysPassed =
+        today.getDate();
+
+} else {
+
+    // 歷史月份：使用該月完整天數
+    daysPassed =
+        new Date(
+            currentYear,
+            currentMonth + 1,
+            0
+        ).getDate();
+
+}
 
 
     const averageDailyExpense =
@@ -1885,6 +1949,290 @@ function loadFinancialAdvice() {
 
 }
 
+// ===============================
+// V7.1 報表月份選擇器
+// ===============================
+
+let selectedReportDate =
+    new Date();
+
+
+function formatReportMonthValue(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    return `${year}-${month}`;
+
+}
+
+// ===============================
+// V7.1 更新報表月份標題
+// ===============================
+
+function updateReportMonthTitles() {
+
+    const year =
+        selectedReportDate.getFullYear();
+
+    const month =
+        selectedReportDate.getMonth() + 1;
+
+    const monthText =
+        `${year}年${month}月`;
+
+
+    // ===============================
+    // 上一個月
+    // ===============================
+
+    const previousDate =
+        new Date(
+            year,
+            selectedReportDate.getMonth() - 1,
+            1
+        );
+
+    const previousYear =
+        previousDate.getFullYear();
+
+    const previousMonth =
+        previousDate.getMonth() + 1;
+
+    const previousMonthText =
+        `${previousYear}年${previousMonth}月`;
+
+
+    // ===============================
+    // 四張主要卡片
+    // ===============================
+
+    const incomeTitle =
+        document.getElementById(
+            "reportIncomeTitle"
+        );
+
+    const expenseTitle =
+        document.getElementById(
+            "reportExpenseTitle"
+        );
+
+    const advanceTitle =
+        document.getElementById(
+            "reportAdvanceTitle"
+        );
+
+    const balanceTitle =
+        document.getElementById(
+            "reportBalanceTitle"
+        );
+
+
+    if (incomeTitle) {
+        incomeTitle.textContent =
+            `${monthText}收入`;
+    }
+
+    if (expenseTitle) {
+        expenseTitle.textContent =
+            `${monthText}支出`;
+    }
+
+    if (advanceTitle) {
+        advanceTitle.textContent =
+            `${monthText}代墊`;
+    }
+
+    if (balanceTitle) {
+        balanceTitle.textContent =
+            `${monthText}餘額`;
+    }
+
+
+    // ===============================
+    // 本月 vs 上月
+    // ===============================
+
+    const comparisonTitle =
+        document.getElementById(
+            "monthComparisonTitle"
+        );
+
+    if (comparisonTitle) {
+
+        comparisonTitle.textContent =
+            `${monthText} vs ${previousMonthText}`;
+
+    }
+
+
+    // ===============================
+    // 財務分析
+    // ===============================
+
+    const financialSummaryTitle =
+        document.getElementById(
+            "financialSummaryTitle"
+        );
+
+    if (financialSummaryTitle) {
+
+        financialSummaryTitle.textContent =
+            `${monthText}財務分析`;
+
+    }
+
+
+    // ===============================
+    // 交易紀錄
+    // ===============================
+
+    const reportTableTitle =
+        document.getElementById(
+            "reportTableTitle"
+        );
+
+    if (reportTableTitle) {
+
+        reportTableTitle.textContent =
+            `${monthText}交易`;
+
+    }
+
+}
+
+
+function updateReportMonthInput() {
+
+    const monthInput =
+        document.getElementById(
+            "reportMonth"
+        );
+
+    if (!monthInput) {
+        return;
+    }
+
+    // 顯示目前選擇的月份
+    monthInput.value =
+        formatReportMonthValue(
+            selectedReportDate
+        );
+
+    // 更新標題
+    if (
+        typeof updateReportMonthTitles ===
+        "function"
+    ) {
+        updateReportMonthTitles();
+    }
+
+    // 控制「下個月」按鈕
+    const nextMonthBtn =
+        document.getElementById(
+            "nextMonthBtn"
+        );
+
+    if (!nextMonthBtn) {
+        return;
+    }
+
+    const now =
+        new Date();
+
+    const currentYear =
+        now.getFullYear();
+
+    const currentMonth =
+        now.getMonth();
+
+    const selectedYear =
+        selectedReportDate.getFullYear();
+
+    const selectedMonth =
+        selectedReportDate.getMonth();
+
+    // 只有選到真正目前月份時才停用
+    nextMonthBtn.disabled =
+        (
+            selectedYear === currentYear &&
+            selectedMonth === currentMonth
+        );
+
+}
+
+
+// 上個月
+function goToPreviousReportMonth() {
+
+    selectedReportDate =
+        new Date(
+            selectedReportDate.getFullYear(),
+            selectedReportDate.getMonth() - 1,
+            1
+        );
+
+   updateReportMonthInput();
+
+loadMonthlyReport();
+loadMonthComparison();
+loadFinancialSummary();
+loadFinancialAdvice();
+loadCategorySummary();
+loadExpenseChart();
+loadSummaryChart();
+loadSixMonthTrendChart();
+
+}
+
+
+// 下個月
+function goToNextReportMonth() {
+
+    const now =
+        new Date();
+
+    const currentMonthDate =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+        );
+
+    const nextDate =
+        new Date(
+            selectedReportDate.getFullYear(),
+            selectedReportDate.getMonth() + 1,
+            1
+        );
+
+    // 不允許超過目前月份
+    if (nextDate > currentMonthDate) {
+        return;
+    }
+
+    selectedReportDate =
+        nextDate;
+
+    updateReportMonthInput();
+
+    loadMonthlyReport();
+    loadMonthComparison();
+    loadFinancialSummary();
+    loadFinancialAdvice();
+    loadCategorySummary();
+    loadExpenseChart();
+    loadSummaryChart();
+    loadSixMonthTrendChart();
+
+}
+
+
 
 // ===============================
 // 支出分類統計
@@ -1896,12 +2244,36 @@ function loadCategorySummary() {
     if (!summaryArea) return;
 
     const transactions = getTransactions();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
+
+const currentYear =
+    reportDate.getFullYear();
+
+const currentMonth =
+    reportDate.getMonth();
 
     const categoryTotals = {};
 
     transactions.forEach(transaction => {
 
-        if (transaction.type !== "支出") return;
+    if (transaction.type !== "支出") return;
+    if (!transaction.date) return;
+
+    const transactionDate =
+        new Date(
+            transaction.date +
+            "T00:00:00"
+        );
+
+    if (
+        transactionDate.getFullYear() !== currentYear ||
+        transactionDate.getMonth() !== currentMonth
+    ) {
+        return;
+    }
 
         const category = transaction.category || "其他";
 
@@ -2036,9 +2408,16 @@ function loadExpenseChart() {
 
     const transactions = getTransactions();
 
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
+
+const currentYear =
+    reportDate.getFullYear();
+
+const currentMonth =
+    reportDate.getMonth();
 
     const categoryTotals = {};
 
@@ -2135,7 +2514,10 @@ function loadSummaryChart() {
 
     const transactions = getTransactions();
 
-    const now = new Date();
+    const reportDate =
+    typeof selectedReportDate !== "undefined"
+        ? selectedReportDate
+        : new Date();
 
     let income = 0;
     let expense = 0;
@@ -2148,8 +2530,8 @@ function loadSummaryChart() {
         const d = new Date(t.date + "T00:00:00");
 
         if (
-            d.getFullYear() !== now.getFullYear() ||
-            d.getMonth() !== now.getMonth()
+            d.getFullYear() !== reportDate.getFullYear() ||
+            d.getMonth() !== reportDate.getMonth()
         ) {
             return;
         }
@@ -2379,6 +2761,82 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+
+const reportMonthInput =
+    document.getElementById(
+        "reportMonth"
+    );
+
+const previousMonthBtn =
+    document.getElementById(
+        "previousMonthBtn"
+    );
+
+const nextMonthBtn =
+    document.getElementById(
+        "nextMonthBtn"
+    );
+
+
+if (reportMonthInput) {
+
+    updateReportMonthInput();
+
+    reportMonthInput.addEventListener(
+        "change",
+        function () {
+
+            if (!this.value) {
+                return;
+            }
+
+            const [year, month] =
+                this.value
+                    .split("-")
+                    .map(Number);
+
+            selectedReportDate =
+                new Date(
+                    year,
+                    month - 1,
+                    1
+                );
+
+            updateReportMonthInput();
+
+            loadMonthlyReport();
+            loadMonthComparison();
+            loadFinancialSummary();
+            loadFinancialAdvice();
+            loadCategorySummary();
+            loadExpenseChart();
+            loadSummaryChart();
+            loadSixMonthTrendChart();
+
+        }
+    );
+
+}
+
+if (previousMonthBtn) {
+
+    previousMonthBtn.addEventListener(
+        "click",
+        goToPreviousReportMonth
+    );
+
+}
+
+if (nextMonthBtn) {
+
+    nextMonthBtn.addEventListener(
+        "click",
+        goToNextReportMonth
+    );
+
+}
+
 
 // ===============================
 // 註冊 Service Worker

@@ -65,7 +65,7 @@
         >
             📕 匯出 PDF
         </button>
-
+        
         <button
             id="exportExcel"
             class="btn btn-success"
@@ -77,13 +77,61 @@
 
 </div>
 
-    <button
-        class="btn btn-success"
-        id="exportExcel">
 
-        📄 匯出 Excel
+</div>
 
-    </button>
+<!-- =====================================
+     V7.1 月份選擇器
+     ===================================== -->
+
+<div class="card p-3 mb-4">
+
+    <div
+        class="
+            d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap
+            gap-3
+        "
+    >
+
+        <button
+            type="button"
+            id="previousMonthBtn"
+            class="btn btn-outline-primary"
+        >
+            ← 上個月
+        </button>
+
+
+        <div class="text-center">
+
+            <label
+                for="reportMonth"
+                class="form-label mb-1"
+            >
+                📅 查看月份
+            </label>
+
+            <input
+                type="month"
+                id="reportMonth"
+                class="form-control"
+            >
+
+        </div>
+
+
+        <button
+            type="button"
+            id="nextMonthBtn"
+            class="btn btn-outline-primary"
+        >
+            下個月 →
+        </button>
+
+    </div>
 
 </div>
 
@@ -93,7 +141,9 @@
 
             <div class="card text-center p-3">
 
-                <h5>💰 本月收入</h5>
+                <h5>
+    💰 <span id="reportIncomeTitle">本月收入</span>
+</h5>
 
                 <h3 id="reportIncome">
                     NT$ 0
@@ -107,7 +157,9 @@
 
             <div class="card text-center p-3">
 
-                <h5>💸 本月支出</h5>
+                <h5>
+    💸 <span id="reportExpenseTitle">本月支出</span>
+</h5>
 
                 <h3 id="reportExpense">
                     NT$ 0
@@ -121,7 +173,10 @@
 
             <div class="card text-center p-3">
 
-                <h5>🧾 本月代墊</h5>
+                <h5>
+    🧾 <span id="reportAdvanceTitle">本月代墊</span>
+</h5>
+
 
                 <h3 id="reportAdvance">
                     NT$ 0
@@ -135,7 +190,9 @@
 
             <div class="card text-center p-3">
 
-                <h5>💵 本月餘額</h5>
+                <h5>
+    💵 <span id="reportBalanceTitle">本月餘額</span>
+</h5>
 
                 <h3 id="reportBalance">
                     NT$ 0
@@ -155,7 +212,7 @@
      ===================================== -->
 
 <h4 class="mb-3">
-    📈 本月 vs 上月
+    📈 <span id="monthComparisonTitle">本月 vs 上月</span>
 </h4>
 
 <div class="row mb-4">
@@ -238,7 +295,7 @@
      ===================================== -->
 
 <h4 class="mb-3">
-    🧠 本月財務分析
+    🧠 <span id="financialSummaryTitle">本月財務分析</span>
 </h4>
 
 <div class="row mb-4">
@@ -385,7 +442,9 @@
 
 </div>
 
-    <h4>📋 本月交易</h4>
+   <h4>
+    📋 <span id="reportTableTitle">本月交易</span>
+</h4>
 
     <div id="reportTable">
 
