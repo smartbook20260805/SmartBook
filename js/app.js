@@ -2188,6 +2188,7 @@ loadExpenseChart();
 loadSummaryChart();
 loadSixMonthTrendChart();
 loadCategoryBudgetUsage();
+loadUnbudgetedExpenseWarning();
 
 }
 
@@ -2231,6 +2232,7 @@ function goToNextReportMonth() {
     loadSummaryChart();
     loadSixMonthTrendChart();
     loadCategoryBudgetUsage();
+    loadUnbudgetedExpenseWarning();
 
 }
 
@@ -2801,6 +2803,278 @@ function loadCategoryBudgetUsage() {
 
 }
 
+// =====================================
+// V7.3 未設定預算的支出提醒
+// =====================================
+
+function loadUnbudgetedExpenseWarning() {
+
+    const warningArea =
+        document.getElementById(
+            "unbudgetedExpenseWarning"
+        );
+
+    if (!warningArea) {
+        return;
+    }
+
+
+    const transactions =
+        typeof getTransactions === "function"
+            ? getTransactions()
+            : [];
+
+
+    const reportDate =
+        typeof selectedReportDate !== "undefined"
+            ? selectedReportDate
+            : new Date();
+
+
+    const currentYear =
+        reportDate.getFullYear();
+
+    const currentMonth =
+        reportDate.getMonth();
+
+
+    // ===============================
+    // 讀取分類預算
+    // ===============================
+
+    let categoryBudgets = {};
+
+    try {
+
+        categoryBudgets =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategoryBudgets"
+                ) || "{}"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取分類預算失敗：",
+            error
+        );
+
+        categoryBudgets = {};
+
+    }
+
+
+    // ===============================
+    // 統計未設定預算的分類支出
+    // ===============================
+
+    const unbudgetedExpenses = {};
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (
+                transaction.type !== "支出" ||
+                !transaction.date
+            ) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+
+            if (
+                transactionDate.getFullYear() !== currentYear ||
+                transactionDate.getMonth() !== currentMonth
+            ) {
+                return;
+            }
+
+
+            const category =
+                transaction.category ||
+                "其他";
+
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            // 已有分類預算就不列入
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    categoryBudgets,
+                    category
+                )
+            ) {
+                return;
+            }
+
+
+            unbudgetedExpenses[category] =
+                (
+                    unbudgetedExpenses[category] ||
+                    0
+                ) + amount;
+
+        }
+    );
+
+
+    const entries =
+        Object.entries(
+            unbudgetedExpenses
+        );
+
+
+    // ===============================
+    // 全部都有設定預算
+    // ===============================
+
+    if (entries.length === 0) {
+
+        warningArea.innerHTML = `
+            <div class="text-success">
+                ✅ 目前這個月份的支出分類都有設定預算。
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    // ===============================
+    // 計算未設定預算總額
+    // ===============================
+
+    const totalUnbudgeted =
+        entries.reduce(
+            function (
+                total,
+                [category, amount]
+            ) {
+
+                return total +
+                    (
+                        Number(amount) ||
+                        0
+                    );
+
+            },
+            0
+        );
+
+
+    // 金額高到低排序
+    entries.sort(
+        function (a, b) {
+
+            return (
+                Number(b[1]) -
+                Number(a[1])
+            );
+
+        }
+    );
+
+
+    // ===============================
+    // 顯示
+    // ===============================
+
+    warningArea.innerHTML = `
+
+        <h5 class="mb-3">
+            ⚠️ 未設定預算的支出
+        </h5>
+
+        <div class="table-responsive">
+
+            <table
+                class="
+                    table
+                    table-sm
+                    align-middle
+                    mb-3
+                "
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            分類
+                        </th>
+
+                        <th class="text-end">
+                            支出
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${entries
+                        .map(
+                            function ([
+                                category,
+                                amount
+                            ]) {
+
+                                return `
+                                    <tr>
+
+                                        <td>
+                                            ${category}
+                                        </td>
+
+                                        <td class="text-end">
+                                            NT$ ${Number(amount).toLocaleString()}
+                                        </td>
+
+                                    </tr>
+                                `;
+
+                            }
+                        )
+                        .join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="alert alert-warning mb-0">
+
+            本月共有
+
+            <strong>
+                NT$ ${totalUnbudgeted.toLocaleString()}
+            </strong>
+
+            的支出尚未設定分類預算。
+
+        </div>
+    `;
+
+}
+
 // ===============================
 // 收入 / 支出 / 代墊 長條圖
 // ===============================
@@ -2978,6 +3252,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadExpenseChart();
     loadSummaryChart();
     loadCategoryBudgetUsage();
+    loadUnbudgetedExpenseWarning();
 
     // Excel 匯出
     const exportExcelButton =
@@ -3113,6 +3388,7 @@ if (reportMonthInput) {
             loadSummaryChart();
             loadSixMonthTrendChart();
             loadCategoryBudgetUsage();
+            loadUnbudgetedExpenseWarning();
 
         }
     );
@@ -3321,6 +3597,15 @@ function refreshSmartBookAfterCloudSync() {
     ) {
     loadCategoryBudgetUsage();
 }
+
+
+    if (
+    typeof loadUnbudgetedExpenseWarning ===
+    "function"
+) {
+    loadUnbudgetedExpenseWarning();
+}  
+
 
 }
 
