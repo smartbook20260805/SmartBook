@@ -995,3 +995,217 @@ body {
     color: #64748b;
     white-space: nowrap;
 }
+
+/* =====================================
+   SmartBook V7.3
+   手機版面統一修正
+   ===================================== */
+
+@media (max-width: 768px) {
+
+    /* =================================
+       整體頁面
+       ================================= */
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .app {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+    }
+
+    .content {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding-bottom: 85px;
+    }
+
+
+    /* =================================
+       舊版側邊選單
+       手機直接隱藏
+       ================================= */
+
+    .sidebar {
+        display: none;
+    }
+
+
+    /* =================================
+       頁面標題
+       ================================= */
+
+    .topbar {
+        width: 100%;
+        padding: 20px 16px 16px;
+    }
+
+    .topbar h1 {
+        font-size: 25px;
+    }
+
+
+    /* =================================
+       Dashboard / 設定頁卡片
+       ================================= */
+
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        gap: 14px;
+        padding: 0 14px 20px;
+    }
+
+    .card-box {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 18px;
+        text-align: left;
+    }
+
+
+    /* =================================
+       Bootstrap row 防止超出
+       ================================= */
+
+    .row {
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+
+    /* =================================
+       一般卡片
+       ================================= */
+
+    .card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+
+    /* =================================
+       表單
+       ================================= */
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+
+    /* =================================
+       表格
+       ================================= */
+
+    .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-responsive table {
+        width: 100%;
+        min-width: 600px;
+    }
+
+
+    /* 一般非 responsive 表格不要強制 900px */
+    table {
+        max-width: 100%;
+    }
+
+
+    /* =================================
+       Canvas / Chart.js
+       ================================= */
+
+    canvas {
+        display: block;
+        max-width: 100% !important;
+    }
+
+
+    /* =================================
+       Dashboard 其他區域
+       ================================= */
+
+    .dashboard-sections {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 14px;
+    }
+
+    .dashboard-panel {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+
+    /* =================================
+       手機底部導覽
+       ================================= */
+
+    .mobile-bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        width: 100%;
+
+        display: grid;
+        grid-template-columns:
+            repeat(6, minmax(0, 1fr));
+
+        z-index: 1000;
+    }
+
+    .mobile-bottom-nav a {
+        min-width: 0;
+    }
+
+}
+
+
+/* =====================================
+   小型手機
+   ===================================== */
+
+@media (max-width: 480px) {
+
+    .dashboard {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .dashboard-sections {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .card-box {
+        padding: 16px;
+    }
+
+}
