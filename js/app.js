@@ -3053,11 +3053,11 @@ function loadUnbudgetedExpenseWarning() {
                                         <td class="text-end">
 
     <a
-        href="setting.html?budgetCategory=${encodeURIComponent(category)}"
-        class="btn btn-outline-primary btn-sm"
-    >
-        🎯 設定預算
-    </a>
+    href="setting.html#categoryBudgetSection"
+    class="btn btn-outline-primary btn-sm"
+>
+    🎯 設定預算
+</a>
 
 </td>
 
