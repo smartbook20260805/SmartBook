@@ -1225,3 +1225,70 @@ body {
     }
 
 }
+
+/* =====================================
+   V7.3 月報手機表格修正
+   ===================================== */
+
+@media (max-width: 768px) {
+
+    /* ===============================
+       支出分類統計
+       兩欄直接完整顯示
+       =============================== */
+
+    #categorySummary {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    #categorySummary table {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        table-layout: fixed;
+    }
+
+    #categorySummary th,
+    #categorySummary td {
+        width: 50%;
+        padding: 10px 8px;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+
+    /* ===============================
+       交易明細
+       欄位較多，可左右滑動
+       =============================== */
+
+    #reportTable {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #reportTable .table-responsive {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #reportTable table {
+        width: 100%;
+        min-width: 700px !important;
+        max-width: none !important;
+    }
+
+    #reportTable th,
+    #reportTable td {
+        white-space: nowrap;
+    }
+
+}
