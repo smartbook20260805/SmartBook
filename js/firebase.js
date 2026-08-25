@@ -180,6 +180,7 @@ function getLocalSmartBookData() {
 
     let transactions = [];
     let categories = [];
+    let categoryBudgets = {};
 
     try {
 
@@ -223,6 +224,27 @@ function getLocalSmartBookData() {
     }
 
 
+    try {
+
+        categoryBudgets =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategoryBudgets"
+                ) || "{}"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取本機分類預算失敗：",
+            error
+        );
+
+        categoryBudgets = {};
+
+    }
+
+
     const monthlyBudget =
         Number(
             localStorage.getItem(
@@ -243,7 +265,14 @@ function getLocalSmartBookData() {
                 ? categories
                 : [],
 
-        monthlyBudget
+        monthlyBudget,
+
+        categoryBudgets:
+            categoryBudgets &&
+            typeof categoryBudgets === "object" &&
+            !Array.isArray(categoryBudgets)
+                ? categoryBudgets
+                : {}
 
     };
 
@@ -269,6 +298,13 @@ function applyCloudData(data) {
     const monthlyBudget =
         Number(data?.monthlyBudget) || 0;
 
+    const categoryBudgets =
+        data?.categoryBudgets &&
+        typeof data.categoryBudgets === "object" &&
+        !Array.isArray(data.categoryBudgets)
+            ? data.categoryBudgets
+            : {};
+
 
     localStorage.setItem(
         "transactions",
@@ -283,6 +319,11 @@ function applyCloudData(data) {
     localStorage.setItem(
         "monthlyBudget",
         String(monthlyBudget)
+    );
+
+    localStorage.setItem(
+        "smartbookCategoryBudgets",
+        JSON.stringify(categoryBudgets)
     );
 
 
@@ -300,6 +341,11 @@ function applyCloudData(data) {
         monthlyBudget
     );
 
+    console.log(
+        "雲端分類預算：",
+        categoryBudgets
+    );
+
 
     // 通知 SmartBook 各模組刷新
     window.dispatchEvent(
@@ -310,7 +356,8 @@ function applyCloudData(data) {
                 detail: {
                     transactions,
                     categories,
-                    monthlyBudget
+                    monthlyBudget,
+                    categoryBudgets
                 }
             }
         )
@@ -318,7 +365,6 @@ function applyCloudData(data) {
     );
 
 }
-
 
 // =====================================
 // 上傳本機資料至 Firestore
@@ -373,6 +419,9 @@ async function uploadLocalDataToCloud() {
 
                 monthlyBudget:
                     localData.monthlyBudget,
+
+                categoryBudgets:
+                    localData.categoryBudgets,    
 
                 updatedAt:
                     serverTimestamp()

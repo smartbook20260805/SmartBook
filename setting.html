@@ -163,6 +163,91 @@
 
 <div class="card-box">
 
+    <h4>🎯 分類預算</h4>
+
+    <p>
+        為不同支出分類設定每月預算。
+    </p>
+
+    <div class="row g-2 mb-3">
+
+        <div class="col-md-5">
+
+            <label
+                for="categoryBudgetCategory"
+                class="form-label"
+            >
+                分類
+            </label>
+
+            <select
+                id="categoryBudgetCategory"
+                class="form-select"
+            >
+                <option value="">
+                    請選擇分類
+                </option>
+            </select>
+
+        </div>
+
+
+        <div class="col-md-5">
+
+            <label
+                for="categoryBudgetAmount"
+                class="form-label"
+            >
+                預算金額
+            </label>
+
+            <input
+                type="number"
+                id="categoryBudgetAmount"
+                class="form-control"
+                min="0"
+                step="1"
+                placeholder="例如：5000"
+            >
+
+        </div>
+
+
+        <div class="col-md-2 d-flex align-items-end">
+
+            <button
+                type="button"
+                id="saveCategoryBudgetBtn"
+                class="btn btn-primary w-100"
+            >
+                儲存
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="categoryBudgetMessage"
+        class="mb-3"
+    >
+    </div>
+
+
+    <div id="categoryBudgetList">
+
+        <p class="text-muted mb-0">
+            尚未設定分類預算
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="card-box">
+
     <h4>📂 分類管理</h4>
 
     <p>
@@ -236,6 +321,9 @@
 
 <!-- 預算 -->
 <script src="js/budget.js"></script>
+
+<!-- 分類預算 -->
+<script src="js/category-budget.js"></script>
 
 <!-- 分類 -->
 <script src="js/category.js"></script>
