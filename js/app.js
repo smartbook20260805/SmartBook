@@ -3021,6 +3021,10 @@ function loadUnbudgetedExpenseWarning() {
                             支出
                         </th>
 
+                        <th class="text-end">
+                            操作
+                        </th>
+
                     </tr>
 
                 </thead>
@@ -3045,6 +3049,17 @@ function loadUnbudgetedExpenseWarning() {
                                         <td class="text-end">
                                             NT$ ${Number(amount).toLocaleString()}
                                         </td>
+
+                                        <td class="text-end">
+
+    <a
+        href="setting.html?budgetCategory=${encodeURIComponent(category)}"
+        class="btn btn-outline-primary btn-sm"
+    >
+        🎯 設定預算
+    </a>
+
+</td>
 
                                     </tr>
                                 `;
