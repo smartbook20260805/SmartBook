@@ -2187,6 +2187,7 @@ loadCategorySummary();
 loadExpenseChart();
 loadSummaryChart();
 loadSixMonthTrendChart();
+loadCategoryBudgetUsage();
 
 }
 
@@ -2229,6 +2230,7 @@ function goToNextReportMonth() {
     loadExpenseChart();
     loadSummaryChart();
     loadSixMonthTrendChart();
+    loadCategoryBudgetUsage();
 
 }
 
@@ -2503,6 +2505,302 @@ new Chart(chartCanvas, {
     }
 });
 } // 
+
+// =====================================
+// V7.3 分類預算使用率
+// =====================================
+
+function loadCategoryBudgetUsage() {
+
+    const usageArea =
+        document.getElementById(
+            "categoryBudgetUsage"
+        );
+
+    if (!usageArea) {
+        return;
+    }
+
+
+    const transactions =
+        typeof getTransactions === "function"
+            ? getTransactions()
+            : [];
+
+
+    const reportDate =
+        typeof selectedReportDate !== "undefined"
+            ? selectedReportDate
+            : new Date();
+
+
+    const currentYear =
+        reportDate.getFullYear();
+
+    const currentMonth =
+        reportDate.getMonth();
+
+
+    // =====================================
+    // 讀取分類預算
+    // =====================================
+
+    let categoryBudgets = {};
+
+    try {
+
+        categoryBudgets =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategoryBudgets"
+                ) || "{}"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取分類預算失敗：",
+            error
+        );
+
+        categoryBudgets = {};
+
+    }
+
+
+    const budgetEntries =
+        Object.entries(
+            categoryBudgets
+        );
+
+
+    if (budgetEntries.length === 0) {
+
+        usageArea.innerHTML = `
+            <p class="text-muted mb-0">
+                尚未設定分類預算。
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    // =====================================
+    // 統計目前選擇月份的分類支出
+    // =====================================
+
+    const categoryExpenses = {};
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (
+                transaction.type !== "支出" ||
+                !transaction.date
+            ) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+
+            if (
+                transactionDate.getFullYear() !== currentYear ||
+                transactionDate.getMonth() !== currentMonth
+            ) {
+                return;
+            }
+
+
+            const category =
+                transaction.category ||
+                "其他";
+
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            categoryExpenses[category] =
+                (
+                    categoryExpenses[category] ||
+                    0
+                ) + amount;
+
+        }
+    );
+
+
+    // =====================================
+    // 建立畫面
+    // =====================================
+
+    usageArea.innerHTML =
+        budgetEntries
+            .map(
+                function ([
+                    category,
+                    budgetValue
+                ]) {
+
+                    const budget =
+                        Number(
+                            budgetValue
+                        ) || 0;
+
+
+                    const spent =
+                        Number(
+                            categoryExpenses[
+                                category
+                            ]
+                        ) || 0;
+
+
+                    const remaining =
+                        budget -
+                        spent;
+
+
+                    const usageRate =
+                        budget > 0
+                            ? (
+                                spent /
+                                budget
+                            ) * 100
+                            : 0;
+
+
+                    const progressWidth =
+                        Math.min(
+                            usageRate,
+                            100
+                        );
+
+
+                    let statusText = "";
+
+                    let progressClass =
+                        "bg-success";
+
+
+                    if (usageRate >= 100) {
+
+                        statusText =
+                            " 🚨 已超出預算";
+
+                        progressClass =
+                            "bg-danger";
+
+                    } else if (
+                        usageRate >= 80
+                    ) {
+
+                        statusText =
+                            " ⚠️ 接近預算上限";
+
+                        progressClass =
+                            "bg-warning";
+
+                    } else {
+
+                        statusText =
+                            " ✅ 預算正常";
+
+                    }
+
+
+                    const remainingText =
+                        remaining >= 0
+                            ? `剩餘 NT$ ${remaining.toLocaleString()}`
+                            : `超支 NT$ ${Math.abs(remaining).toLocaleString()}`;
+
+
+                    return `
+                        <div class="mb-4">
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    flex-wrap
+                                    gap-2
+                                    mb-2
+                                "
+                            >
+
+                                <strong>
+                                    ${category}
+                                </strong>
+
+                                <span>
+                                    ${usageRate.toFixed(1)}%
+                                    ${statusText}
+                                </span>
+
+                            </div>
+
+
+                            <div class="mb-2">
+
+                                NT$ ${spent.toLocaleString()}
+                                /
+                                NT$ ${budget.toLocaleString()}
+
+                            </div>
+
+
+                            <div
+                                class="progress mb-2"
+                                style="height: 12px;"
+                            >
+
+                                <div
+                                    class="
+                                        progress-bar
+                                        ${progressClass}
+                                    "
+                                    role="progressbar"
+                                    style="width: ${progressWidth}%;"
+                                    aria-valuenow="${progressWidth}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                >
+                                </div>
+
+                            </div>
+
+
+                            <small
+                                class="${
+                                    remaining >= 0
+                                        ? "text-muted"
+                                        : "text-danger"
+                                }"
+                            >
+                                ${remainingText}
+                            </small>
+
+                        </div>
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
 // ===============================
 // 收入 / 支出 / 代墊 長條圖
 // ===============================
@@ -2679,6 +2977,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadCategorySummary();
     loadExpenseChart();
     loadSummaryChart();
+    loadCategoryBudgetUsage();
 
     // Excel 匯出
     const exportExcelButton =
@@ -2813,6 +3112,7 @@ if (reportMonthInput) {
             loadExpenseChart();
             loadSummaryChart();
             loadSixMonthTrendChart();
+            loadCategoryBudgetUsage();
 
         }
     );
@@ -3014,6 +3314,13 @@ function refreshSmartBookAfterCloudSync() {
     if (typeof refreshCalendar === "function") {
         refreshCalendar();
     }
+
+    if (
+    typeof loadCategoryBudgetUsage ===
+    "function"
+    ) {
+    loadCategoryBudgetUsage();
+}
 
 }
 
