@@ -447,6 +447,59 @@ function deleteCategoryBudget(category) {
 
 
 // =====================================
+// 從網址自動帶入分類
+// =====================================
+
+function applyBudgetCategoryFromURL() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const budgetCategory =
+        params.get(
+            "budgetCategory"
+        );
+
+    if (!budgetCategory) {
+        return;
+    }
+
+    const select =
+        document.getElementById(
+            "categoryBudgetCategory"
+        );
+
+    if (!select) {
+        return;
+    }
+
+    const optionExists =
+        Array.from(
+            select.options
+        ).some(
+            function (option) {
+
+                return (
+                    option.value ===
+                    budgetCategory
+                );
+
+            }
+        );
+
+    if (!optionExists) {
+        return;
+    }
+
+    select.value =
+        budgetCategory;
+
+}
+
+
+// =====================================
 // 頁面初始化
 // =====================================
 
@@ -459,8 +512,9 @@ document.addEventListener(
                 "saveCategoryBudgetBtn"
             );
 
-
         loadCategoryBudgetSelect();
+
+        applyBudgetCategoryFromURL();
 
         renderCategoryBudgetList();
 
@@ -487,6 +541,9 @@ window.addEventListener(
     function () {
 
         loadCategoryBudgetSelect();
+
+        applyBudgetCategoryFromURL();
+
         renderCategoryBudgetList();
 
     }
