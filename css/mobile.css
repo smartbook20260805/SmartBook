@@ -404,6 +404,13 @@
         background: #1d4ed8;
     }
 
+    /* 手機浮動新增按鈕改為 button 後重置預設樣式 */
+button.mobile-fab {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
     /* ===============================
        手機底部導航
        =============================== */
