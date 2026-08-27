@@ -544,10 +544,14 @@ function deleteTransaction(index) {
     saveTransactions(transactions);
 
     if (editIndex === index) {
-        resetForm();
-    } else if (editIndex > index) {
-        editIndex -= 1;
-    }
+
+    editIndex = -1;
+
+} else if (editIndex > index) {
+
+    editIndex -= 1;
+
+}
 
     loadTransactions();
     updateDashboard();
