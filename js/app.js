@@ -2189,6 +2189,7 @@ loadSummaryChart();
 loadSixMonthTrendChart();
 loadCategoryBudgetUsage();
 loadUnbudgetedExpenseWarning();
+loadBudgetHealth();
 
 }
 
@@ -2233,6 +2234,7 @@ function goToNextReportMonth() {
     loadSixMonthTrendChart();
     loadCategoryBudgetUsage();
     loadUnbudgetedExpenseWarning();
+    loadBudgetHealth();
 
 }
 
@@ -2507,6 +2509,335 @@ new Chart(chartCanvas, {
     }
 });
 } // 
+
+// =====================================
+// V7.4 本月預算健康度
+// =====================================
+
+function loadBudgetHealth() {
+
+    const healthArea =
+        document.getElementById(
+            "budgetHealth"
+        );
+
+    if (!healthArea) {
+        return;
+    }
+
+
+    const transactions =
+        typeof getTransactions === "function"
+            ? getTransactions()
+            : [];
+
+
+    const reportDate =
+        typeof selectedReportDate !== "undefined"
+            ? selectedReportDate
+            : new Date();
+
+
+    const reportYear =
+        reportDate.getFullYear();
+
+    const reportMonth =
+        reportDate.getMonth();
+
+
+    // =====================================
+    // 讀取分類預算
+    // =====================================
+
+    let categoryBudgets = {};
+
+    try {
+
+        categoryBudgets =
+            JSON.parse(
+                localStorage.getItem(
+                    "smartbookCategoryBudgets"
+                ) || "{}"
+            );
+
+    } catch (error) {
+
+        console.error(
+            "讀取分類預算失敗：",
+            error
+        );
+
+        categoryBudgets = {};
+
+    }
+
+
+    const budgetEntries =
+        Object.entries(
+            categoryBudgets
+        );
+
+
+    if (budgetEntries.length === 0) {
+
+        healthArea.innerHTML = `
+            <p class="text-muted mb-0">
+                尚未設定分類預算，無法分析預算健康度。
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    // =====================================
+    // 分類預算總額
+    // =====================================
+
+    const totalBudget =
+        budgetEntries.reduce(
+            function (
+                total,
+                [category, amount]
+            ) {
+
+                return total +
+                    (
+                        Number(amount) ||
+                        0
+                    );
+
+            },
+            0
+        );
+
+
+    // =====================================
+    // 計算有設定預算分類的實際支出
+    // =====================================
+
+    let totalSpent = 0;
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (
+                transaction.type !== "支出" ||
+                !transaction.date
+            ) {
+                return;
+            }
+
+
+            const transactionDate =
+                new Date(
+                    transaction.date +
+                    "T00:00:00"
+                );
+
+
+            if (
+                transactionDate.getFullYear() !== reportYear ||
+                transactionDate.getMonth() !== reportMonth
+            ) {
+                return;
+            }
+
+
+            const category =
+                transaction.category ||
+                "其他";
+
+
+            // 只有設定分類預算的支出才計入
+            if (
+                !Object.prototype.hasOwnProperty.call(
+                    categoryBudgets,
+                    category
+                )
+            ) {
+                return;
+            }
+
+
+            totalSpent +=
+                Number(
+                    transaction.amount
+                ) || 0;
+
+        }
+    );
+
+
+    const budgetUsageRate =
+        totalBudget > 0
+            ? (
+                totalSpent /
+                totalBudget
+            ) * 100
+            : 0;
+
+
+    // =====================================
+    // 計算月份時間進度
+    // =====================================
+
+    const now =
+        new Date();
+
+    const isCurrentMonth =
+        reportYear === now.getFullYear() &&
+        reportMonth === now.getMonth();
+
+
+    let monthProgressRate = 100;
+
+
+    if (isCurrentMonth) {
+
+        const daysInMonth =
+            new Date(
+                reportYear,
+                reportMonth + 1,
+                0
+            ).getDate();
+
+
+        monthProgressRate =
+            (
+                now.getDate() /
+                daysInMonth
+            ) * 100;
+
+    }
+
+
+    // =====================================
+    // 健康度判斷
+    // =====================================
+
+    let healthIcon = "🟢";
+    let healthTitle = "預算健康";
+    let healthMessage =
+        "目前支出速度在合理範圍內。";
+
+
+    if (budgetUsageRate >= 100) {
+
+        healthIcon = "🔴";
+        healthTitle = "預算警示";
+        healthMessage =
+            "目前已超出分類預算，建議檢查本月主要支出。";
+
+    } else if (
+        isCurrentMonth &&
+        budgetUsageRate >
+            monthProgressRate + 15
+    ) {
+
+        healthIcon = "🔴";
+        healthTitle = "支出速度偏高";
+        healthMessage =
+            "目前預算使用速度明顯高於月份進度，建議控制接下來的支出。";
+
+    } else if (
+        budgetUsageRate >= 80 ||
+        (
+            isCurrentMonth &&
+            budgetUsageRate >
+                monthProgressRate
+        )
+    ) {
+
+        healthIcon = "🟡";
+        healthTitle = "注意支出";
+        healthMessage =
+            "目前支出速度較快，建議留意接下來的預算使用。";
+
+    }
+
+
+    // =====================================
+    // 顯示健康度
+    // =====================================
+
+    healthArea.innerHTML = `
+
+        <div class="mb-3">
+
+            <h5 class="mb-2">
+                ${healthIcon}
+                ${healthTitle}
+            </h5>
+
+            <p class="mb-0">
+                ${healthMessage}
+            </p>
+
+        </div>
+
+
+        <div class="row g-3">
+
+            <div class="col-6">
+
+                <div
+                    class="
+                        border
+                        rounded
+                        p-3
+                        h-100
+                    "
+                >
+
+                    <small class="text-muted">
+                        ${
+                            isCurrentMonth
+                                ? "本月時間進度"
+                                : "月份進度"
+                        }
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        ${monthProgressRate.toFixed(1)}%
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-6">
+
+                <div
+                    class="
+                        border
+                        rounded
+                        p-3
+                        h-100
+                    "
+                >
+
+                    <small class="text-muted">
+                        預算使用率
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        ${budgetUsageRate.toFixed(1)}%
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
 
 // =====================================
 // V7.3 分類預算使用率
@@ -3268,6 +3599,8 @@ document.addEventListener("DOMContentLoaded", function () {
     loadSummaryChart();
     loadCategoryBudgetUsage();
     loadUnbudgetedExpenseWarning();
+    loadBudgetHealth();
+
 
     // Excel 匯出
     const exportExcelButton =
@@ -3404,6 +3737,7 @@ if (reportMonthInput) {
             loadSixMonthTrendChart();
             loadCategoryBudgetUsage();
             loadUnbudgetedExpenseWarning();
+            loadBudgetHealth();
 
         }
     );
@@ -3620,6 +3954,14 @@ function refreshSmartBookAfterCloudSync() {
 ) {
     loadUnbudgetedExpenseWarning();
 }  
+
+
+     if (
+    typeof loadBudgetHealth ===
+    "function"
+) {
+    loadBudgetHealth();
+}
 
 
 }
