@@ -245,45 +245,286 @@ function displayFilteredTransactions(filteredTransactions) {
 }
 
 // ===============================
-// 編輯交易
+// V7.4 編輯交易
+// 使用新版交易 Modal
 // ===============================
+
 function editTransaction(index) {
 
-    const transactions = getTransactions();
-    const transaction = transactions[index];
+    const transactions =
+        getTransactions();
 
-    if (!transaction) return;
+    const transaction =
+        transactions[index];
 
-    document.getElementById("date").value = transaction.date;
-    document.getElementById("type").value = transaction.type;
-    document.getElementById("category").value = transaction.category || "其他";
-    document.getElementById("advancePerson").value =
-    transaction.advancePerson || "";
-
-    document.getElementById("advanceStatus").value =
-        transaction.advanceStatus || "未收回";
-
-    document.getElementById("recoveredDate").value =
-        transaction.recoveredDate || "";
-
-    document.getElementById("item").value = transaction.item;
-    document.getElementById("amount").value = transaction.amount;
-    document.getElementById("note").value = transaction.note || "";
-
-    editIndex = index;
-
-    const addBtn = document.getElementById("addBtn");
-
-    if (addBtn) {
-        addBtn.textContent = "儲存修改";
-        addBtn.classList.remove("btn-primary");
-        addBtn.classList.add("btn-warning");
+    if (!transaction) {
+        return;
     }
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+
+    // 記住正在修改哪一筆
+    editIndex = index;
+
+
+    const type =
+        transaction.type || "支出";
+
+
+    // ===============================
+    // 切換 Modal 到正確交易類型
+    // ===============================
+
+    if (
+        typeof updateQuickTransactionFields ===
+        "function"
+    ) {
+
+        updateQuickTransactionFields(
+            type
+        );
+
+    }
+
+
+    // ===============================
+    // 更新上方類型按鈕 active
+    // ===============================
+
+    const typeButtons =
+        document.querySelectorAll(
+            ".quick-type-btn"
+        );
+
+    typeButtons.forEach(
+        function (button) {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.type === type
+            );
+
+        }
+    );
+
+
+    // ===============================
+    // 取得新版欄位
+    // ===============================
+
+    const dateInput =
+        document.getElementById(
+            "quickDate"
+        );
+
+    const typeInput =
+        document.getElementById(
+            "quickType"
+        );
+
+    const categoryInput =
+        document.getElementById(
+            "quickCategory"
+        );
+
+    const itemInput =
+        document.getElementById(
+            "quickItem"
+        );
+
+    const amountInput =
+        document.getElementById(
+            "quickAmount"
+        );
+
+    const accountInput =
+        document.getElementById(
+            "quickAccount"
+        );
+
+    const noteInput =
+        document.getElementById(
+            "quickNote"
+        );
+
+    const advancePersonInput =
+        document.getElementById(
+            "quickAdvancePerson"
+        );
+
+    const receivablePersonInput =
+        document.getElementById(
+            "quickReceivablePerson"
+        );
+
+    const expectedReceiveDateInput =
+        document.getElementById(
+            "quickExpectedReceiveDate"
+        );
+
+    const fromAccountInput =
+        document.getElementById(
+            "quickFromAccount"
+        );
+
+    const toAccountInput =
+        document.getElementById(
+            "quickToAccount"
+        );
+
+
+    // ===============================
+    // 帶入原交易資料
+    // ===============================
+
+    if (dateInput) {
+        dateInput.value =
+            transaction.date || "";
+    }
+
+    if (typeInput) {
+        typeInput.value =
+            type;
+    }
+
+    if (categoryInput) {
+        categoryInput.value =
+            transaction.category || "其他";
+    }
+
+    if (itemInput) {
+        itemInput.value =
+            type === "轉帳"
+                ? ""
+                : transaction.item || "";
+    }
+
+    if (amountInput) {
+        amountInput.value =
+            transaction.amount || "";
+    }
+
+    if (accountInput) {
+        accountInput.value =
+            transaction.account || "現金";
+    }
+
+    if (noteInput) {
+        noteInput.value =
+            transaction.note || "";
+    }
+
+    if (advancePersonInput) {
+        advancePersonInput.value =
+            transaction.advancePerson || "";
+    }
+
+    if (receivablePersonInput) {
+        receivablePersonInput.value =
+            transaction.receivablePerson || "";
+    }
+
+    if (expectedReceiveDateInput) {
+        expectedReceiveDateInput.value =
+            transaction.expectedReceiveDate || "";
+    }
+
+    if (fromAccountInput) {
+        fromAccountInput.value =
+            transaction.fromAccount || "現金";
+    }
+
+    if (toAccountInput) {
+        toAccountInput.value =
+            transaction.toAccount || "銀行";
+    }
+
+
+    // ===============================
+    // Modal 改成修改模式
+    // ===============================
+
+    const modalElement =
+        document.getElementById(
+            "quickTransactionModal"
+        );
+
+    if (!modalElement) {
+
+        console.error(
+            "找不到 quickTransactionModal"
+        );
+
+        return;
+
+    }
+
+
+    const modalTitle =
+        modalElement.querySelector(
+            ".modal-title"
+        );
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            "修改交易";
+
+    }
+
+
+    const saveButton =
+        document.getElementById(
+            "quickAddBtn"
+        );
+
+    if (saveButton) {
+
+        saveButton.textContent =
+            "儲存修改";
+
+        saveButton.classList.remove(
+            "btn-primary"
+        );
+
+        saveButton.classList.add(
+            "btn-warning"
+        );
+
+    }
+
+
+    // 修改時先隱藏「儲存並繼續新增」
+    const continueButton =
+        document.getElementById(
+            "quickSaveAndContinueBtn"
+        );
+
+    if (continueButton) {
+
+        continueButton.classList.add(
+            "d-none"
+        );
+
+    }
+
+
+    // ===============================
+    // 開啟 Modal
+    // ===============================
+
+    if (
+        typeof bootstrap !==
+        "undefined"
+    ) {
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+        modal.show();
+
+    }
 
 }
 

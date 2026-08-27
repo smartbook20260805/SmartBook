@@ -848,9 +848,39 @@ function addQuickEntryTransaction() {
     };
 
 
+    // =====================================
+// 新增 / 修改交易
+// =====================================
+
+const isEditing =
+    typeof editIndex !== "undefined" &&
+    editIndex >= 0;
+
+
+if (isEditing) {
+
+    // 保留原本可能存在的其他資料
+    transactions[editIndex] = {
+
+        ...transactions[editIndex],
+
+        ...newTransaction
+
+    };
+
+
+    console.log(
+        "Quick Entry：交易已修改",
+        transactions[editIndex]
+    );
+
+} else {
+
     transactions.push(
         newTransaction
     );
+
+}
 
 
     // =====================================
@@ -860,6 +890,13 @@ function addQuickEntryTransaction() {
     saveQuickEntryTransactions(
         transactions
     );
+
+    // 修改完成後退出編輯模式
+if (isEditing) {
+
+    editIndex = -1;
+
+}
 
 
     console.log(
@@ -872,15 +909,80 @@ function addQuickEntryTransaction() {
 
 
     showQuickEntryMessage(
-        `✅ 已新增 ${type} NT$ ${amount.toLocaleString()}`,
-        "success"
-    );
+
+    isEditing
+        ? `✅ 已修改 ${type} NT$ ${amount.toLocaleString()}`
+        : `✅ 已新增 ${type} NT$ ${amount.toLocaleString()}`,
+
+    "success"
+
+);
 
 
     resetQuickEntryForm();
 
 
     return true;
+
+}
+
+// =====================================
+// 恢復 Modal 新增模式
+// =====================================
+
+const modalElement =
+    document.getElementById(
+        "quickTransactionModal"
+    );
+
+if (modalElement) {
+
+    const modalTitle =
+        modalElement.querySelector(
+            ".modal-title"
+        );
+
+    if (modalTitle) {
+
+        modalTitle.textContent =
+            "新增交易";
+
+    }
+
+}
+
+
+const saveButton =
+    document.getElementById(
+        "quickAddBtn"
+    );
+
+if (saveButton) {
+
+    saveButton.textContent =
+        "儲存交易";
+
+    saveButton.classList.remove(
+        "btn-warning"
+    );
+
+    saveButton.classList.add(
+        "btn-primary"
+    );
+
+}
+
+
+const continueButton =
+    document.getElementById(
+        "quickSaveAndContinueBtn"
+    );
+
+if (continueButton) {
+
+    continueButton.classList.remove(
+        "d-none"
+    );
 
 }
 
@@ -1075,6 +1177,113 @@ typeButtons.forEach(
 
     }
 );
+
+const quickModalElement =
+    document.getElementById(
+        "quickTransactionModal"
+    );
+
+
+if (quickModalElement) {
+
+    quickModalElement.addEventListener(
+        "hidden.bs.modal",
+        function () {
+
+            // 退出編輯模式
+            if (
+                typeof editIndex !==
+                "undefined"
+            ) {
+
+                editIndex = -1;
+
+            }
+
+
+            // 標題恢復
+            const modalTitle =
+                quickModalElement.querySelector(
+                    ".modal-title"
+                );
+
+            if (modalTitle) {
+
+                modalTitle.textContent =
+                    "新增交易";
+
+            }
+
+
+            // 儲存按鈕恢復
+            const saveButton =
+                document.getElementById(
+                    "quickAddBtn"
+                );
+
+            if (saveButton) {
+
+                saveButton.textContent =
+                    "儲存交易";
+
+                saveButton.classList.remove(
+                    "btn-warning"
+                );
+
+                saveButton.classList.add(
+                    "btn-primary"
+                );
+
+            }
+
+
+            // 恢復「儲存並繼續新增」
+            const continueButton =
+                document.getElementById(
+                    "quickSaveAndContinueBtn"
+                );
+
+            if (continueButton) {
+
+                continueButton.classList.remove(
+                    "d-none"
+                );
+
+            }
+
+
+            // 清空表單
+            resetQuickEntryForm();
+
+
+            // 回到預設支出模式
+            updateQuickTransactionFields(
+                "支出"
+            );
+
+
+            // 類型按鈕恢復支出 active
+            const typeButtons =
+                document.querySelectorAll(
+                    ".quick-type-btn"
+                );
+
+            typeButtons.forEach(
+                function (button) {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.type ===
+                        "支出"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
 
 
 // 預設顯示支出
