@@ -359,9 +359,6 @@ function updateQuickTransactionFields(type) {
     const receivablePersonGroup =
         document.getElementById("quickReceivablePersonGroup");
 
-    const expectedReceiveDateGroup =
-        document.getElementById("quickExpectedReceiveDateGroup");
-
     const fromAccountGroup =
         document.getElementById("quickFromAccountGroup");
 
@@ -396,10 +393,6 @@ function updateQuickTransactionFields(type) {
 
     if (receivablePersonGroup) {
         receivablePersonGroup.classList.add("d-none");
-    }
-
-    if (expectedReceiveDateGroup) {
-        expectedReceiveDateGroup.classList.add("d-none");
     }
 
     if (fromAccountGroup) {
@@ -440,10 +433,6 @@ function updateQuickTransactionFields(type) {
 
         if (receivablePersonGroup) {
             receivablePersonGroup.classList.remove("d-none");
-        }
-
-        if (expectedReceiveDateGroup) {
-            expectedReceiveDateGroup.classList.remove("d-none");
         }
 
     }
@@ -531,11 +520,6 @@ function addQuickEntryTransaction() {
             "quickReceivablePerson"
         );
 
-    const expectedReceiveDateInput =
-        document.getElementById(
-            "quickExpectedReceiveDate"
-        );
-
     const fromAccountInput =
         document.getElementById(
             "quickFromAccount"
@@ -601,11 +585,6 @@ function addQuickEntryTransaction() {
     const receivablePerson =
         receivablePersonInput
             ? receivablePersonInput.value.trim()
-            : "";
-
-    const expectedReceiveDate =
-        expectedReceiveDateInput
-            ? expectedReceiveDateInput.value
             : "";
 
     const fromAccount =
@@ -823,11 +802,6 @@ function addQuickEntryTransaction() {
         receivablePerson:
             type === "應收款"
                 ? receivablePerson
-                : "",
-
-        expectedReceiveDate:
-            type === "應收款"
-                ? expectedReceiveDate
                 : "",
 
         receivableStatus:

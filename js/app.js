@@ -557,123 +557,8 @@ function deleteTransaction(index) {
     updateDashboard();
 
 }
-// ===============================
-// 清空表單
-// ===============================
-function resetForm() {
 
-    const dateInput = document.getElementById("date");
-    const typeInput = document.getElementById("type");
-    const categoryInput = document.getElementById("category");
-    const advancePersonInput =
-         document.getElementById("advancePerson");
 
-    const advanceStatusInput =
-         document.getElementById("advanceStatus");
-
-    const recoveredDateInput =
-         document.getElementById("recoveredDate");
-
-    const itemInput = document.getElementById("item");
-    const amountInput = document.getElementById("amount");
-    const noteInput = document.getElementById("note");
-    const addBtn = document.getElementById("addBtn");
-
-    if (dateInput) dateInput.value = "";
-    if (typeInput) typeInput.value = "收入";
-    if (categoryInput) categoryInput.value = "薪資";
-    if (advancePersonInput) advancePersonInput.value = "";
-
-    if (advanceStatusInput) {
-        advanceStatusInput.value = "未收回";
-    }
-
-    if (recoveredDateInput) {
-        recoveredDateInput.value = "";
-    }
-
-    if (itemInput) itemInput.value = "";
-    if (amountInput) amountInput.value = "";
-    if (noteInput) noteInput.value = "";
-
-    editIndex = -1;
-
-    if (addBtn) {
-        addBtn.textContent = "新增交易";
-        addBtn.classList.remove("btn-warning");
-        addBtn.classList.add("btn-primary");
-    }
-
-}
-
-// ===============================
-// 新增或儲存修改
-// ===============================
-const addBtn = document.getElementById("addBtn");
-
-if (addBtn) {
-
-    addBtn.addEventListener("click", function () {
-
-        const date = document.getElementById("date").value;
-        const type = document.getElementById("type").value;
-        const category = document.getElementById("category").value;
-        const advancePerson =
-            document.getElementById("advancePerson").value.trim();
-
-        const advanceStatus =
-            document.getElementById("advanceStatus").value;
-
-        const recoveredDate =
-            document.getElementById("recoveredDate").value;
-
-        const item = document.getElementById("item").value.trim();
-        const amount = document.getElementById("amount").value;
-        const note = document.getElementById("note").value.trim();
-
-        if (!date || !item || !amount) {
-            alert("請填寫日期、項目和金額！");
-            return;
-        }
-
-        if (Number(amount) <= 0) {
-            alert("金額必須大於 0！");
-            return;
-        }
-
-        const transactions = getTransactions();
-
-        const transactionData = {
-             date,
-             type,
-             category,
-             advancePerson,
-             advanceStatus,
-             recoveredDate,
-             item,
-             amount: Number(amount),
-             note
-        };
-
-        if (editIndex === -1) {
-
-            transactions.push(transactionData);
-
-        } else {
-
-            transactions[editIndex] = transactionData;
-
-        }
-
-        saveTransactions(transactions);
-
-        loadTransactions();
-        updateDashboard();
-        resetForm();
-
-    });
-
-}
 // ===============================
 // 最近交易（Dashboard）
 // ===============================
@@ -786,6 +671,374 @@ function loadAdvanceSummary() {
         </div>
     `;
 }
+
+// ===============================
+// 應收款統計
+// ===============================
+function loadReceivableSummary() {
+
+    const summaryArea =
+        document.getElementById(
+            "receivableSummary"
+        );
+
+    if (!summaryArea) return;
+
+
+    const transactions =
+        getTransactions();
+
+
+    let pendingTotal = 0;
+    let receivedTotal = 0;
+    let pendingCount = 0;
+
+
+    const receivables =
+        transactions.filter(
+            function (transaction) {
+
+                return (
+                    transaction.type ===
+                    "應收款"
+                );
+
+            }
+        );
+
+
+    receivables.forEach(
+        function (transaction) {
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            if (
+                transaction.receivableStatus ===
+                "已收款"
+            ) {
+
+                receivedTotal +=
+                    amount;
+
+            } else {
+
+                pendingTotal +=
+                    amount;
+
+                pendingCount++;
+
+            }
+
+        }
+    );
+
+
+    if (receivables.length === 0) {
+
+        summaryArea.innerHTML = `
+            <p class="text-muted mb-0">
+                尚無應收款資料
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    summaryArea.innerHTML = `
+
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3">
+
+                    <small class="text-muted">
+                        待收總額
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        NT$ ${pendingTotal.toLocaleString()}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3">
+
+                    <small class="text-muted">
+                        未收款筆數
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        ${pendingCount} 筆
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="border rounded p-3">
+
+                    <small class="text-muted">
+                        已收款總額
+                    </small>
+
+                    <div class="fw-bold mt-1">
+                        NT$ ${receivedTotal.toLocaleString()}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table
+                class="
+                    table
+                    table-bordered
+                    table-hover
+                    align-middle
+                "
+            >
+
+                <thead>
+
+                    <tr>
+
+                        <th>客戶／欠款人</th>
+
+                        <th>項目</th>
+
+                        <th>金額</th>
+
+                        <th>建立日期</th>
+
+                        <th>實際收款日</th>
+
+                        <th>狀態</th>
+
+                        <th>操作</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${receivables
+                        .map(
+                            function (
+                                transaction
+                            ) {
+
+                                const status =
+                                    transaction.receivableStatus ||
+                                    "未收款";
+
+
+                                return `
+
+                                    <tr>
+
+                                        <td>
+                                            ${
+                                                transaction.receivablePerson ||
+                                                "未填寫"
+                                            }
+                                        </td>
+
+                                        <td>
+                                            ${
+                                                transaction.item ||
+                                                "-"
+                                            }
+                                        </td>
+
+                                        <td>
+                                            NT$ ${Number(
+                                                transaction.amount
+                                            ).toLocaleString()}
+                                        </td>
+
+                                        <td>
+                                            ${
+                                                transaction.date ||
+                                                "-"
+                                            }
+                                        </td>
+
+                                        <td>
+    ${
+        transaction.receivedDate ||
+        "-"
+    }
+</td>
+
+                                        <td>
+
+                                            ${
+                                                status ===
+                                                "已收款"
+                                                    ? "✅ 已收款"
+                                                    : "⏳ 未收款"
+                                            }
+
+                                        </td>
+
+                                        <td>
+
+                                            ${
+    status === "已收款"
+        ? `
+            <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                onclick="undoReceivableReceived(${transactions.indexOf(transaction)})"
+            >
+                取消已收款
+            </button>
+        `
+        : `
+            <button
+                type="button"
+                class="btn btn-success btn-sm"
+                onclick="markReceivableReceived(${transactions.indexOf(transaction)})"
+            >
+                標記已收款
+            </button>
+        `
+}
+
+                                        </td>
+
+                                    </tr>
+
+                                `;
+
+                            }
+                        )
+                        .join("")}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+}
+
+// ===============================
+// 標記應收款為已收款
+// ===============================
+function markReceivableReceived(index) {
+
+    const transactions = getTransactions();
+
+    if (!transactions[index]) {
+        return;
+    }
+
+    const transaction = transactions[index];
+
+    if (transaction.type !== "應收款") {
+        return;
+    }
+
+
+    // 預設為今天
+    const today =
+        new Date().toISOString().split("T")[0];
+
+
+    // 讓使用者輸入實際收款日期
+    const receivedDate = prompt(
+        "請輸入實際收款日期（YYYY-MM-DD）",
+        today
+    );
+
+
+    // 按取消就不做任何修改
+    if (receivedDate === null) {
+        return;
+    }
+
+
+    // 日期不能空白
+    if (!receivedDate.trim()) {
+
+        alert("請輸入實際收款日期");
+
+        return;
+    }
+
+
+    transaction.receivableStatus = "已收款";
+    transaction.receivedDate = receivedDate.trim();
+
+
+    saveTransactions(transactions);
+
+    loadTransactions();
+    loadReceivableSummary();
+    updateDashboard();
+}
+
+
+// ===============================
+// 取消應收款已收款狀態
+// ===============================
+function undoReceivableReceived(index) {
+
+    const transactions = getTransactions();
+
+    if (!transactions[index]) {
+        return;
+    }
+
+    const transaction = transactions[index];
+
+    if (transaction.type !== "應收款") {
+        return;
+    }
+
+    const confirmed = confirm(
+        "確定要將這筆應收款改回「未收款」嗎？"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    transaction.receivableStatus = "未收款";
+    transaction.receivedDate = "";
+
+    saveTransactions(transactions);
+
+    loadTransactions();
+    loadReceivableSummary();
+    updateDashboard();
+}
+
 
 // ===============================
 // 本月報表
@@ -3845,6 +4098,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadCategoryBudgetUsage();
     loadUnbudgetedExpenseWarning();
     loadBudgetHealth();
+    loadReceivableSummary();
 
 
     // Excel 匯出
@@ -4038,6 +4292,7 @@ window.addEventListener("pageshow", function () {
     updateDashboard();
     loadRecentTransactions();
     loadAdvanceSummary();
+    loadReceivableSummary();
 
     loadMonthlyReport();
     loadMonthComparison();
@@ -4387,6 +4642,13 @@ window.addEventListener(
         );
 
         refreshSmartBookAfterCloudSync();
+
+        if (
+            typeof loadReceivableSummary ===
+            "function"
+        ) {
+            loadReceivableSummary();
+        }
 
     }
 );
