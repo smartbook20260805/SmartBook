@@ -249,6 +249,138 @@
 </div>
 
 
+<!-- =====================================
+     帳戶管理
+     ===================================== -->
+
+<div class="card-box">
+
+    <h4>💳 帳戶管理</h4>
+
+    <p>
+        新增或管理 SmartBook 記帳時使用的帳戶。
+    </p>
+
+
+    <label
+        for="newAccountName"
+        class="form-label"
+    >
+        帳戶名稱
+    </label>
+
+
+    <div class="row g-3 mb-3">
+
+    <!-- 帳戶名稱 -->
+    <div class="col-md-5">
+
+        <label
+            for="newAccountName"
+            class="form-label"
+        >
+            帳戶名稱
+        </label>
+
+        <input
+            type="text"
+            id="newAccountName"
+            class="form-control"
+            placeholder="例如：郵局、台新銀行、LINE Pay"
+        >
+
+    </div>
+
+
+    <!-- 帳戶類型 -->
+    <div class="col-md-4">
+
+        <label
+            for="newAccountType"
+            class="form-label"
+        >
+            帳戶類型
+        </label>
+
+        <select
+            id="newAccountType"
+            class="form-select"
+        >
+
+            <option value="現金">
+                現金
+            </option>
+
+            <option value="銀行">
+                銀行帳戶
+            </option>
+
+            <option value="信用卡">
+                信用卡
+            </option>
+
+            <option value="電子支付">
+                電子支付
+            </option>
+
+            <option value="其他">
+                其他
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- 新增按鈕 -->
+    <div
+        class="
+            col-md-3
+            d-flex
+            align-items-end
+        "
+    >
+
+        <button
+            type="button"
+            id="addAccountBtn"
+            class="btn btn-primary w-100"
+        >
+            ＋ 新增帳戶
+        </button>
+
+    </div>
+
+</div>
+
+
+    <p
+        id="accountMessage"
+        class="mt-2 mb-3"
+        style="display: none;"
+    ></p>
+
+
+    <hr>
+
+
+    <h5 class="mb-3">
+        我的帳戶
+    </h5>
+
+
+    <div id="accountList">
+
+        <p class="text-muted">
+            載入帳戶中...
+        </p>
+
+    </div>
+
+</div>
+
+
+
 <div class="card-box">
 
     <h4>📂 分類管理</h4>
@@ -330,6 +462,9 @@
 
 <!-- 分類 -->
 <script src="js/category.js"></script>
+
+<!-- 帳戶管理 -->
+<script src="js/account.js"></script>
 
 </body>
 
