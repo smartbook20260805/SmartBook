@@ -1062,6 +1062,221 @@ window.addEventListener(
 
         loadAccountSelects();
         renderAccountList();
+        renderAccountOverview();
+        !netAssetsElement
+
+    }
+);
+
+// =====================================
+// 首頁帳戶總覽
+// =====================================
+function renderAccountOverview() {
+
+    const overviewList =
+        document.getElementById(
+            "accountOverviewList"
+        );
+
+    const totalAssetsElement =
+        document.getElementById(
+            "accountTotalAssets"
+        );
+
+    const creditCardDebtElement =
+        document.getElementById(
+            "accountCreditCardDebt"
+        );
+
+    const netAssetsElement =
+    document.getElementById(
+        "accountNetAssets"
+    );    
+
+
+    // 不是首頁就不執行
+    if (
+        !overviewList ||
+        !totalAssetsElement ||
+        !creditCardDebtElement
+    ) {
+        return;
+    }
+
+
+    const accounts =
+        getAccounts();
+
+    const accountTypes =
+        getAccountTypes();
+
+
+    let totalAssets = 0;
+    let totalCreditCardDebt = 0;
+
+
+    // =====================================
+    // 計算總資產與信用卡未繳
+    // =====================================
+    accounts.forEach(function (account) {
+
+        const accountType =
+            accountTypes[account] || "其他";
+
+        const balance =
+            getAccountBalance(account);
+
+
+        // 信用卡另外計算未繳金額
+        if (accountType === "信用卡") {
+
+            const debt =
+                Math.max(0, -balance);
+
+            totalCreditCardDebt +=
+                debt;
+
+            return;
+        }
+
+
+        // 非信用卡帳戶計入總資產
+        totalAssets +=
+            balance;
+
+    });
+
+
+    // =====================================
+    // 更新總額
+    // =====================================
+    totalAssetsElement.textContent =
+        `NT$ ${totalAssets.toLocaleString()}`;
+
+    creditCardDebtElement.textContent =
+        `NT$ ${totalCreditCardDebt.toLocaleString()}`;
+
+    const netAssets =
+    totalAssets - totalCreditCardDebt;
+
+netAssetsElement.textContent =
+    `NT$ ${netAssets.toLocaleString()}`;    
+
+
+    // =====================================
+    // 沒有帳戶
+    // =====================================
+    if (accounts.length === 0) {
+
+        overviewList.innerHTML = `
+            <p class="empty-message">
+                尚無帳戶資料
+            </p>
+        `;
+
+        return;
+    }
+
+
+    // =====================================
+    // 顯示各帳戶
+    // =====================================
+    overviewList.innerHTML =
+        accounts
+            .map(function (account) {
+
+                const accountType =
+                    accountTypes[account] ||
+                    "其他";
+
+                const balance =
+                    getAccountBalance(
+                        account
+                    );
+
+                const isCreditCard =
+                    accountType ===
+                    "信用卡";
+
+
+                const displayAmount =
+                    isCreditCard
+                        ? Math.max(
+                            0,
+                            -balance
+                        )
+                        : balance;
+
+
+                const amountLabel =
+                    isCreditCard
+                        ? "未繳"
+                        : "餘額";
+
+
+                const amountClass =
+                    isCreditCard &&
+                    displayAmount > 0
+                        ? "text-danger"
+                        : (
+                            displayAmount < 0
+                                ? "text-danger"
+                                : "text-success"
+                        );
+
+
+                return `
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                            border-bottom
+                            py-3
+                        "
+                    >
+
+                        <div>
+
+                            <div class="fw-bold">
+                                ${account}
+                            </div>
+
+                            <small class="text-muted">
+                                ${accountType}
+                            </small>
+
+                        </div>
+
+
+                        <div class="text-end">
+
+                            <small class="text-muted d-block">
+                                ${amountLabel}
+                            </small>
+
+                            <strong class="${amountClass}">
+                                NT$ ${displayAmount.toLocaleString()}
+                            </strong>
+
+                        </div>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+}
+
+// =====================================
+// 首頁載入時顯示帳戶總覽
+// =====================================
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        renderAccountOverview();
 
     }
 );
