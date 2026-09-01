@@ -674,6 +674,31 @@ async function uploadLocalDataToCloud() {
 
 
 // =====================================
+// 接收帳戶資料變更通知
+// =====================================
+window.addEventListener(
+    "smartbook-account-data-changed",
+    async function () {
+
+        console.log(
+            "SmartBook：收到帳戶資料變更"
+        );
+
+        const success =
+            await uploadLocalDataToCloud();
+
+        if (success) {
+            console.log(
+                "SmartBook：帳戶資料已同步雲端"
+            );
+        }
+
+    }
+);
+
+
+
+// =====================================
 // 從 Firestore 下載資料
 // =====================================
 

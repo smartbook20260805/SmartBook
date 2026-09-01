@@ -539,6 +539,13 @@ saveAccountTypes(
 
     renderAccountList();
     loadAccountSelects();
+
+    window.dispatchEvent(
+    new CustomEvent(
+        "smartbook-account-data-changed"
+    )
+);
+
 }
 
 // =====================================
@@ -621,6 +628,12 @@ saveAccountInitialBalances(
 
 renderAccountList();
 loadAccountSelects();
+
+window.dispatchEvent(
+    new CustomEvent(
+        "smartbook-account-data-changed"
+    )
+); 
 
 }
 
@@ -751,6 +764,15 @@ function editAccountInitialBalance(accountName) {
 
 
     renderAccountList();
+
+    // =====================================
+// 通知 Firebase：帳戶資料已變更
+// =====================================
+window.dispatchEvent(
+    new CustomEvent(
+        "smartbook-account-data-changed"
+    )
+);
 
 }
 
@@ -1030,6 +1052,16 @@ function saveAccountEdit() {
     loadAccountSelects();
 
 
+    // =====================================
+// 通知 Firebase：帳戶資料已變更
+// =====================================
+window.dispatchEvent(
+    new CustomEvent(
+        "smartbook-account-data-changed"
+    )
+);
+
+
     // 關閉 Modal
     const modalElement =
         document.getElementById(
@@ -1063,7 +1095,6 @@ window.addEventListener(
         loadAccountSelects();
         renderAccountList();
         renderAccountOverview();
-        !netAssetsElement
 
     }
 );
@@ -1089,16 +1120,17 @@ function renderAccountOverview() {
         );
 
     const netAssetsElement =
-    document.getElementById(
-        "accountNetAssets"
-    );    
+        document.getElementById(
+            "accountNetAssets"
+        );
 
 
     // 不是首頁就不執行
     if (
         !overviewList ||
         !totalAssetsElement ||
-        !creditCardDebtElement
+        !creditCardDebtElement ||
+        !netAssetsElement
     ) {
         return;
     }
@@ -1127,28 +1159,33 @@ function renderAccountOverview() {
             getAccountBalance(account);
 
 
-        // 信用卡另外計算未繳金額
+        // 信用卡另外計算未繳
         if (accountType === "信用卡") {
 
             const debt =
                 Math.max(0, -balance);
 
-            totalCreditCardDebt +=
-                debt;
+            totalCreditCardDebt += debt;
 
             return;
         }
 
 
         // 非信用卡帳戶計入總資產
-        totalAssets +=
-            balance;
+        totalAssets += balance;
 
     });
 
 
     // =====================================
-    // 更新總額
+    // 淨資產
+    // =====================================
+    const netAssets =
+        totalAssets - totalCreditCardDebt;
+
+
+    // =====================================
+    // 更新畫面
     // =====================================
     totalAssetsElement.textContent =
         `NT$ ${totalAssets.toLocaleString()}`;
@@ -1156,11 +1193,8 @@ function renderAccountOverview() {
     creditCardDebtElement.textContent =
         `NT$ ${totalCreditCardDebt.toLocaleString()}`;
 
-    const netAssets =
-    totalAssets - totalCreditCardDebt;
-
-netAssetsElement.textContent =
-    `NT$ ${netAssets.toLocaleString()}`;    
+    netAssetsElement.textContent =
+        `NT$ ${netAssets.toLocaleString()}`;
 
 
     // =====================================
@@ -1190,14 +1224,10 @@ netAssetsElement.textContent =
                     "其他";
 
                 const balance =
-                    getAccountBalance(
-                        account
-                    );
+                    getAccountBalance(account);
 
                 const isCreditCard =
-                    accountType ===
-                    "信用卡";
-
+                    accountType === "信用卡";
 
                 const displayAmount =
                     isCreditCard
@@ -1207,12 +1237,10 @@ netAssetsElement.textContent =
                         )
                         : balance;
 
-
                 const amountLabel =
                     isCreditCard
                         ? "未繳"
                         : "餘額";
-
 
                 const amountClass =
                     isCreditCard &&
@@ -1223,7 +1251,6 @@ netAssetsElement.textContent =
                                 ? "text-danger"
                                 : "text-success"
                         );
-
 
                 return `
                     <div
