@@ -179,9 +179,12 @@ function getUserDataDoc() {
 function getLocalSmartBookData() {
 
     let transactions = [];
-    let categories = [];
-    let categoryBudgets = {};
+let categories = [];
+let categoryBudgets = {};
 
+let accounts = [];
+let accountTypes = {};
+let accountInitialBalances = {};
     try {
 
         transactions =
@@ -245,6 +248,78 @@ function getLocalSmartBookData() {
     }
 
 
+    // =====================================
+// 讀取帳戶
+// =====================================
+try {
+
+    accounts =
+        JSON.parse(
+            localStorage.getItem(
+                "accounts"
+            ) || "[]"
+        );
+
+} catch (error) {
+
+    console.error(
+        "讀取本機帳戶失敗：",
+        error
+    );
+
+    accounts = [];
+
+}
+
+
+// =====================================
+// 讀取帳戶類型
+// =====================================
+try {
+
+    accountTypes =
+        JSON.parse(
+            localStorage.getItem(
+                "accountTypes"
+            ) || "{}"
+        );
+
+} catch (error) {
+
+    console.error(
+        "讀取本機帳戶類型失敗：",
+        error
+    );
+
+    accountTypes = {};
+
+}
+
+
+// =====================================
+// 讀取帳戶初始餘額
+// =====================================
+try {
+
+    accountInitialBalances =
+        JSON.parse(
+            localStorage.getItem(
+                "accountInitialBalances"
+            ) || "{}"
+        );
+
+} catch (error) {
+
+    console.error(
+        "讀取本機帳戶初始餘額失敗：",
+        error
+    );
+
+    accountInitialBalances = {};
+
+}
+
+
     const monthlyBudget =
         Number(
             localStorage.getItem(
@@ -268,13 +343,35 @@ function getLocalSmartBookData() {
         monthlyBudget,
 
         categoryBudgets:
-            categoryBudgets &&
-            typeof categoryBudgets === "object" &&
-            !Array.isArray(categoryBudgets)
-                ? categoryBudgets
-                : {}
+    categoryBudgets &&
+    typeof categoryBudgets === "object" &&
+    !Array.isArray(categoryBudgets)
+        ? categoryBudgets
+        : {},
 
-    };
+
+accounts:
+    Array.isArray(accounts)
+        ? accounts
+        : [],
+
+
+accountTypes:
+    accountTypes &&
+    typeof accountTypes === "object" &&
+    !Array.isArray(accountTypes)
+        ? accountTypes
+        : {},
+
+
+accountInitialBalances:
+    accountInitialBalances &&
+    typeof accountInitialBalances === "object" &&
+    !Array.isArray(accountInitialBalances)
+        ? accountInitialBalances
+        : {}
+
+};
 
 }
 
@@ -306,6 +403,28 @@ function applyCloudData(data) {
             : {};
 
 
+    // =====================================
+    // 帳戶資料
+    // =====================================
+
+    const hasCloudAccounts =
+        Array.isArray(data?.accounts);
+
+    const hasCloudAccountTypes =
+        data?.accountTypes &&
+        typeof data.accountTypes === "object" &&
+        !Array.isArray(data.accountTypes);
+
+    const hasCloudInitialBalances =
+        data?.accountInitialBalances &&
+        typeof data.accountInitialBalances === "object" &&
+        !Array.isArray(data.accountInitialBalances);
+
+
+    // =====================================
+    // 原有 SmartBook 資料
+    // =====================================
+
     localStorage.setItem(
         "transactions",
         JSON.stringify(transactions)
@@ -327,6 +446,53 @@ function applyCloudData(data) {
     );
 
 
+    // =====================================
+    // 套用雲端帳戶
+    // =====================================
+    // 只有 Firebase 確實存在該欄位時才覆蓋本機，
+    // 避免舊版雲端資料把本機帳戶清空。
+    // =====================================
+
+    if (hasCloudAccounts) {
+
+        localStorage.setItem(
+            "accounts",
+            JSON.stringify(
+                data.accounts
+            )
+        );
+
+    }
+
+
+    if (hasCloudAccountTypes) {
+
+        localStorage.setItem(
+            "accountTypes",
+            JSON.stringify(
+                data.accountTypes
+            )
+        );
+
+    }
+
+
+    if (hasCloudInitialBalances) {
+
+        localStorage.setItem(
+            "accountInitialBalances",
+            JSON.stringify(
+                data.accountInitialBalances
+            )
+        );
+
+    }
+
+
+    // =====================================
+    // Console
+    // =====================================
+
     console.log(
         "雲端資料已寫入 localStorage"
     );
@@ -347,7 +513,26 @@ function applyCloudData(data) {
     );
 
 
+    if (hasCloudAccounts) {
+
+        console.log(
+            "雲端帳戶：",
+            data.accounts
+        );
+
+    } else {
+
+        console.log(
+            "雲端尚無帳戶資料，保留本機帳戶"
+        );
+
+    }
+
+
+    // =====================================
     // 通知 SmartBook 各模組刷新
+    // =====================================
+
     window.dispatchEvent(
 
         new CustomEvent(
@@ -357,7 +542,22 @@ function applyCloudData(data) {
                     transactions,
                     categories,
                     monthlyBudget,
-                    categoryBudgets
+                    categoryBudgets,
+
+                    accounts:
+                        hasCloudAccounts
+                            ? data.accounts
+                            : null,
+
+                    accountTypes:
+                        hasCloudAccountTypes
+                            ? data.accountTypes
+                            : null,
+
+                    accountInitialBalances:
+                        hasCloudInitialBalances
+                            ? data.accountInitialBalances
+                            : null
                 }
             }
         )
@@ -365,8 +565,6 @@ function applyCloudData(data) {
     );
 
 }
-
-
 // =====================================
 // 上傳本機資料至 Firestore
 // =====================================
@@ -408,32 +606,46 @@ async function uploadLocalDataToCloud() {
 
         await setDoc(
 
-            userDocRef,
+    userDocRef,
 
-            {
+    {
 
-                transactions:
-                    localData.transactions,
+        transactions:
+            localData.transactions,
 
-                categories:
-                    localData.categories,
+        categories:
+            localData.categories,
 
-                monthlyBudget:
-                    localData.monthlyBudget,
+        monthlyBudget:
+            localData.monthlyBudget,
 
-                categoryBudgets:
-                    localData.categoryBudgets,    
+        categoryBudgets:
+            localData.categoryBudgets,
 
-                updatedAt:
-                    serverTimestamp()
 
-            },
+        // =====================================
+        // 帳戶資料
+        // =====================================
+        accounts:
+            localData.accounts,
 
-            {
-                merge: true
-            }
+        accountTypes:
+            localData.accountTypes,
 
-        );
+        accountInitialBalances:
+            localData.accountInitialBalances,
+
+
+        updatedAt:
+            serverTimestamp()
+
+    },
+
+    {
+        merge: true
+    }
+
+);
 
 
         console.log(

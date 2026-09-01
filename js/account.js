@@ -276,8 +276,24 @@ document.addEventListener(
 
         }
 
+        const saveAccountEditBtn =
+    document.getElementById(
+        "saveAccountEditBtn"
+    );
+
+
+if (saveAccountEditBtn) {
+
+    saveAccountEditBtn.addEventListener(
+        "click",
+        saveAccountEdit
+    );
+
+}
+
     }
 );
+
 
 // =====================================
 // 顯示帳戶管理清單
@@ -291,7 +307,9 @@ function renderAccountList() {
         return;
     }
 
-    const accounts = getAccounts();
+
+    const accounts =
+        getAccounts();
 
 
     if (accounts.length === 0) {
@@ -306,100 +324,112 @@ function renderAccountList() {
     }
 
 
+    const accountTypes =
+        getAccountTypes();
+
+
     accountList.innerHTML =
         accounts
             .map(function (account) {
 
-               const balance =
-    getAccountBalance(account);
-
-const accountTypes =
-    getAccountTypes();
-
-const accountType =
-    accountTypes[account] || "其他";
-
-const isCreditCard =
-    accountType === "信用卡";
-
-const displayBalance =
-    isCreditCard
-        ? Math.max(0, -balance)
-        : balance;
-
-const balanceLabel =
-    isCreditCard
-        ? "目前未繳"
-        : "目前餘額";    
-
-return `
-
-    <div
-        class="
-            d-flex
-            justify-content-between
-            align-items-center
-            border
-            rounded
-            p-3
-            mb-2
-        "
-    >
-
-        <div>
-
-            <div class="fw-bold">
-                ${account}
-            </div>
-
-            <small class="text-muted d-block mb-1">
-    ${accountType}
-</small>
-
-            <small class="text-muted">
-    ${balanceLabel}
-</small>
-
-            <div
-                class="${
-                    displayBalance < 0
-                        ? "text-danger"
-                        : "text-success"
-                } fw-bold"
-            >
-                NT$ ${displayBalance.toLocaleString()}
-            </div>
-
-        </div>
+                const balance =
+                    getAccountBalance(account);
 
 
-        <div class="d-flex gap-2">
+                const accountType =
+                    accountTypes[account] || "其他";
 
-    <button
-        type="button"
-        class="btn btn-outline-primary btn-sm"
-        onclick="editAccountInitialBalance('${account}')"
-    >
-        設定初始餘額
-    </button>
 
-    <button
-        type="button"
-        class="btn btn-outline-danger btn-sm"
-        onclick="deleteAccount('${account}')"
-    >
-        刪除
-    </button>
+                const isCreditCard =
+                    accountType === "信用卡";
 
-</div>
 
-    </div>
-`;
+                const displayBalance =
+                    isCreditCard
+                        ? Math.max(0, -balance)
+                        : balance;
+
+
+                const balanceLabel =
+                    isCreditCard
+                        ? "目前未繳"
+                        : "目前餘額";
+
+
+                return `
+                    <div
+                        class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                            border
+                            rounded
+                            p-3
+                            mb-2
+                        "
+                    >
+
+                        <div>
+
+                            <div class="fw-bold">
+                                ${account}
+                            </div>
+
+                            <small class="text-muted d-block mb-1">
+                                ${accountType}
+                            </small>
+
+                            <small class="text-muted">
+                                ${balanceLabel}
+                            </small>
+
+                            <div
+                                class="${
+                                    displayBalance < 0
+                                        ? "text-danger"
+                                        : "text-success"
+                                } fw-bold"
+                            >
+                                NT$ ${displayBalance.toLocaleString()}
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex gap-2 flex-wrap">
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                onclick="editAccount('${account}')"
+                            >
+                                編輯
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                onclick="editAccountInitialBalance('${account}')"
+                            >
+                                設定初始餘額
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                onclick="deleteAccount('${account}')"
+                            >
+                                刪除
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
 
             })
             .join("");
 }
-
 
 // =====================================
 // 新增帳戶
@@ -556,14 +586,13 @@ function deleteAccount(accountName) {
 
 
     const accounts =
-        getAccounts().filter(
-            function (account) {
+    getAccounts().filter(
+        function (account) {
 
-                return account !== accountName;
+            return account !== accountName;
 
-            }
-        );
-
+        }
+    );
 
     saveAccounts(accounts);
 
@@ -724,3 +753,315 @@ function editAccountInitialBalance(accountName) {
     renderAccountList();
 
 }
+
+// =====================================
+// 開啟編輯帳戶視窗
+// =====================================
+function editAccount(accountName) {
+
+    const modalElement =
+        document.getElementById(
+            "editAccountModal"
+        );
+
+    const originalNameInput =
+        document.getElementById(
+            "editAccountOriginalName"
+        );
+
+    const nameInput =
+        document.getElementById(
+            "editAccountName"
+        );
+
+    const typeSelect =
+        document.getElementById(
+            "editAccountType"
+        );
+
+
+    if (
+        !modalElement ||
+        !originalNameInput ||
+        !nameInput ||
+        !typeSelect
+    ) {
+
+        console.error(
+            "找不到編輯帳戶視窗"
+        );
+
+        return;
+    }
+
+
+    const accountTypes =
+        getAccountTypes();
+
+
+    // 記住原本帳戶名稱
+    originalNameInput.value =
+        accountName;
+
+
+    // 帶入目前名稱
+    nameInput.value =
+        accountName;
+
+
+    // 帶入目前帳戶類型
+    typeSelect.value =
+        accountTypes[accountName] ||
+        "其他";
+
+
+    // 開啟 Bootstrap Modal
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+
+    modal.show();
+
+}
+
+// =====================================
+// 儲存帳戶修改
+// =====================================
+function saveAccountEdit() {
+
+    const originalNameInput =
+        document.getElementById(
+            "editAccountOriginalName"
+        );
+
+    const nameInput =
+        document.getElementById(
+            "editAccountName"
+        );
+
+    const typeSelect =
+        document.getElementById(
+            "editAccountType"
+        );
+
+
+    if (
+        !originalNameInput ||
+        !nameInput ||
+        !typeSelect
+    ) {
+        return;
+    }
+
+
+    const originalName =
+        originalNameInput.value;
+
+    const newAccountName =
+        nameInput.value.trim();
+
+    const newAccountType =
+        typeSelect.value;
+
+
+    // 帳戶名稱不能空白
+    if (!newAccountName) {
+
+        alert(
+            "帳戶名稱不能空白"
+        );
+
+        return;
+    }
+
+
+    const accounts =
+        getAccounts();
+
+
+    // 檢查名稱是否重複
+    if (
+        newAccountName !== originalName &&
+        accounts.includes(newAccountName)
+    ) {
+
+        alert(
+            `「${newAccountName}」已經存在`
+        );
+
+        return;
+    }
+
+
+    // =====================================
+    // 更新帳戶名稱
+    // =====================================
+    const updatedAccounts =
+        accounts.map(function (account) {
+
+            if (account === originalName) {
+                return newAccountName;
+            }
+
+            return account;
+
+        });
+
+
+    saveAccounts(
+        updatedAccounts
+    );
+
+
+    // =====================================
+    // 更新帳戶類型
+    // =====================================
+    const accountTypes =
+        getAccountTypes();
+
+    delete accountTypes[originalName];
+
+    accountTypes[newAccountName] =
+        newAccountType;
+
+    saveAccountTypes(
+        accountTypes
+    );
+
+
+    // =====================================
+    // 搬移初始餘額
+    // =====================================
+    const initialBalances =
+        getAccountInitialBalances();
+
+
+    if (
+        Object.prototype.hasOwnProperty.call(
+            initialBalances,
+            originalName
+        )
+    ) {
+
+        initialBalances[newAccountName] =
+            initialBalances[originalName];
+
+
+        if (
+            newAccountName !== originalName
+        ) {
+
+            delete initialBalances[
+                originalName
+            ];
+
+        }
+
+    }
+
+
+    saveAccountInitialBalances(
+        initialBalances
+    );
+
+
+    // =====================================
+    // 同步更新舊交易
+    // =====================================
+    const transactions =
+        JSON.parse(
+            localStorage.getItem(
+                "transactions"
+            )
+        ) || [];
+
+
+    transactions.forEach(
+        function (transaction) {
+
+            if (
+                transaction.account ===
+                originalName
+            ) {
+
+                transaction.account =
+                    newAccountName;
+
+            }
+
+
+            if (
+                transaction.fromAccount ===
+                originalName
+            ) {
+
+                transaction.fromAccount =
+                    newAccountName;
+
+            }
+
+
+            if (
+                transaction.toAccount ===
+                originalName
+            ) {
+
+                transaction.toAccount =
+                    newAccountName;
+
+            }
+
+        }
+    );
+
+
+    localStorage.setItem(
+        "transactions",
+        JSON.stringify(transactions)
+    );
+
+
+    // =====================================
+    // 更新畫面
+    // =====================================
+    renderAccountList();
+    loadAccountSelects();
+
+
+    // 關閉 Modal
+    const modalElement =
+        document.getElementById(
+            "editAccountModal"
+        );
+
+    const modal =
+        bootstrap.Modal.getInstance(
+            modalElement
+        );
+
+
+    if (modal) {
+        modal.hide();
+    }
+
+
+    alert(
+        "✅ 帳戶已更新"
+    );
+
+}
+
+// =====================================
+// Firebase 雲端更新後刷新帳戶
+// =====================================
+window.addEventListener(
+    "smartbook-cloud-updated",
+    function () {
+
+        loadAccountSelects();
+        renderAccountList();
+
+    }
+);
